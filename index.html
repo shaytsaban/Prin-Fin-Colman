@@ -123,10 +123,51 @@
         li:nth-child(3) { animation-delay: 0.3s; }
         li:nth-child(4) { animation-delay: 0.4s; }
         li:nth-child(5) { animation-delay: 0.5s; }
+
+        /* New button style */
+        .live-lecture-button {
+            display: block;
+            width: fit-content; /* Adjust width based on content */
+            margin: 20px auto; /* Center the button and add some margin */
+            padding: 20px 40px;
+            background: linear-gradient(45deg, #FFD700, #FFA500); /* Bright, warm colors */
+            color: #333; /* Darker text for contrast */
+            text-decoration: none;
+            font-size: 1.8em;
+            font-weight: bold;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 0 5px rgba(255, 255, 0, 0.5); /* Big bright shadow */
+            transition: all 0.3s ease;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: pulse 1.5s infinite alternate; /* Pulsing animation */
+        }
+
+        .live-lecture-button:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4), 0 0 0 7px rgba(255, 255, 0, 0.7);
+            background: linear-gradient(45deg, #FFA500, #FFD700);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 0 0 5px rgba(255, 255, 0, 0.5);
+            }
+            100% {
+                transform: scale(1.03);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 0 0 8px rgba(255, 255, 0, 0.8);
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <a href="https://yvc-ac-il.zoom.us/j/6302238641?omn=83513561237" class="live-lecture-button">
+            access live lecture here! click it dude!
+        </a>
+
         <h1>Principles of Finance for Accountants</h1>
         <h2>Underground Site by Dr. Tsaban</h2>
         <p>Uncover the core principles of finance tailored for accountants with this insightful resource by Dr. Shay Tsaban. Designed to empower financial professionals, this course blends essential theory with practical applications to thrive in today's complex financial world.</p>
@@ -149,19 +190,19 @@
 
         <h2>Get the Course Notes</h2>
         <p>Download the full course notes below, packed with examples, exercises, and actionable insights:</p>
-        <a href="https://github.com/shaytsaban/Prin-Fin-Colman/raw/main/Coursebook%202025%20B%20-%20Complete%20File.xlsx" 
+        <a href="https://github.com/shaytsaban/Prin-Fin-Colman/raw/main/Coursebook%202025%20B%20-%20Complete%20File.xlsx"
             class="download-btn"
             download="Coursebook 2025 B - Complete File.xlsx">Download Now 📥</a>
 
         <h2>Intro to the Course</h2>
         <p>Get a head start with an introduction to the course:</p>
-        <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/pWrU2M49Frg" 
-            title="Course Introduction" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/pWrU2M49Frg"
+            title="Course Introduction"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen>
         </iframe>
         <p><em>Course materials will be updated regularly.</em></p>
@@ -170,128 +211,137 @@
         <p>Discover all the course recordings here and relive the learning fun! 🎉✨</p>
         <h3>Lecture 1 - Principles of FV (Mathematically and Using Excel)</h3>
         <p>Dive into the basics of Future Value (FV) calculations! This lecture kicks off with the time value of money, exploring how a single sum grows over time. Learn to compute FV with simple interest (e.g., Bobby deposits 100,000 ILS for 7 years at 5% to get 135,000 ILS) and compound interest (e.g., Svetlana’s 90,000 ILS grows to 146,600 ILS over 10 years at 5%). Master variable rates too—like Alfredo’s 20,000 ILS turning into 37,034 ILS over 9 years with shifting rates. We’ll solve these step-by-step mathematically and harness Excel’s FV function for efficiency!</p>
-        <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/s19_Tobq_3c?si=YzYUh_L5d90l4_Hv" 
-            title="YouTube video player" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-            referrerpolicy="strict-origin-when-cross-origin" 
+        <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/s19_Tobq_3c?si=YzYUh_L5d90l4_Hv"
+            title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
         </iframe>
 
         <h3>Lecture 2 - Advanced Implementation of FV</h3>
         <p>Ready to level up your FV game? 🚀 In this epic session, we’re diving deeper into Future Value madness with Excel wizardry! Think Sahar Avital tripling her 80,000 ILS in 28 years at 4% (yep, she’s in it for the long haul! ⏳), or Harel Arbeli plotting a 6,000 ILS deposit to snag an 8,000 ILS MacBook Pro in 5 years—complete with monthly vs. yearly rate showdowns! 💻 We’ll tackle funky scenarios like Esti Ganti’s hotdog machine savings plan (two deposits, 1% monthly interest, and a dream worth 10,000 ILS! 🌭) and Shilat Jimani’s monthly hustle to hit 2.5M ILS for a dream apartment in 10 years! 🏠 Expect step-by-step Excel magic, wild financial storytelling, and a sprinkle of chaos—because finance is FUN! 😎</p>
-        <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/mZ3fpVrka34" 
-            title="Lecture 2 - Advanced Implementation of FV" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/mZ3fpVrka34"
+            title="Lecture 2 - Advanced Implementation of FV"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
         </iframe>
 
         <h3>Lecture 3 - Basic Implementation of PV</h3>
         <p>Holly Molly just when you thought it's gonna be easy peasy... The mere concept of PV makes heroes sweat. Do your best, may the lord guide our path 😎</p>
-        <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/ONTgess_DFo" 
-            title="Lecture 3 - Basic Implementation of PV" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/ONTgess_DFo"
+            title="Lecture 3 - Basic Implementation of PV"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
         </iframe>
 
         <h3>Lecture 4 - PV of Series of Payments</h3>
         <p> This lecture explores the concept of PV of annuities - series of payments. It has a steeper learning curve - self exercising is required. </p>
-        <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/fin4kLUimqU" 
-            title="Lecture 4 - PV of Series of Payments" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/fin4kLUimqU"
+            title="Lecture 4 - PV of Series of Payments"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
         </iframe>
 
         <h3>Lecture 5 - Effective Interest - 8.5.2025 </h3>
         <p> This lecture explores the effective interest in the specific case of compund interest rates. </p>
-        <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/8XzdO9611R4" 
-            title="Lecture 5 - Effective Interest - 8.5.2025" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/8XzdO9611R4"
+            title="Lecture 5 - Effective Interest - 8.5.2025"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
         </iframe>
 
         <h3>Lecture 6 - Effective Interest Part 2 - 14.5.2025 </h3>
         <p> This lecture explores the effective interest in the specific case of compund interest rates. </p>
-        <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/ssBH414yfoE" 
-            title="Lecture 6 - Effective Interest Part 2 - 14.5.2025" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/ssBH414yfoE"
+            title="Lecture 6 - Effective Interest Part 2 - 14.5.2025"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
         </iframe>
 
         <h3>Lecture 7 - Loans 21.5.2025 </h3>
         <p> This lecture explores the way it is appropriate to calculate the financial components of the cash flows associated with loans. </p>
-        <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/UiGy5hwymPw" 
-            title="Lecture 7 - Loans 21.5.2025" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/UiGy5hwymPw"
+            title="Lecture 7 - Loans 21.5.2025"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
         </iframe>
 
-         <h3>Lecture 8 - Loans Part 2 -  28.5.2025 </h3>
+        <h3>Lecture 8 - Loans Part 2 - 28.5.2025 </h3>
         <p> Let's dig deeper into loans! </p>
-        <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/A0XerIm5Cbc" 
-            title="Lecture 7 - Loans 21.5.2025" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/A0XerIm5Cbc"
+            title="Lecture 7 - Loans 21.5.2025"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
         </iframe>
 
-         <h3>Lecture 9 - Linkage - 4.6.2025 </h3>
+        <h3>Lecture 9 - Linkage - 4.6.2025 </h3>
         <p> Linkage means: הצמדות. It delves into the terms: ריבית ריאלית, נומינלית, אינפלציה and associated terms. </p>
-        <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/-q60ZrVWNs4" 
-            title="Lecture 7 - Loans 21.5.2025" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/-q60ZrVWNs4"
+            title="Lecture 7 - Loans 21.5.2025"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
         </iframe>
 
-         <h3>Lecture 10 - Projects - 11.6.2025 </h3>
+        <h3>Lecture 10 - Projects - 11.6.2025 </h3>
         <p> That was fun! We introduced the concepts of NPV and IRR to determine a project's worth. </p>
-        <iframe 
-            width="560" 
-            height="315" 
-            src="https://www.youtube.com/embed/o6QoT8tkaEA" 
-            title="Lecture 7 - Loans 21.5.2025" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        <iframe
+            width="560"
+            height="315"
+            src="https://www.youtube.com/embed/o6QoT8tkaEA"
+            title="Lecture 7 - Loans 21.5.2025"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
         </iframe>
 
 
         <div class="footer">
-            <p><em>Updated as of June 4th, 2025</em></p>
+            <p><em>Updated as of June 17th, 2025</em></p>
         </div>
     </div>
 </body>
