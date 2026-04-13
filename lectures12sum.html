@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אינפוגרפיקה – יסודות המימון: ערך עתידי</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+:root {
+  --bg: #f5f3ee;
+  --bg2: #eae7e0;
+  --white: #ffffff;
+  --card: #ffffff;
+  --text: #1a1a2e;
+  --text2: #4a4a5a;
+  --muted: #7a7a8a;
+  --gold: #b8860b;
+  --gold-light: #f5e6c0;
+  --gold-bg: #fdf8ed;
+  --teal: #0f7b6c;
+  --teal-bg: #e8f6f3;
+  --coral: #c0392b;
+  --coral-bg: #fdecea;
+  --blue: #1a5276;
+  --blue-bg: #e8f0f8;
+  --purple: #6c3483;
+  --purple-bg: #f0e6f6;
+  --border: #e0dcd4;
+  --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  --shadow-hover: 0 6px 24px rgba(0,0,0,0.1);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Heebo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.75;
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+/* ─── HERO ─── */
+.hero {
+  text-align: center;
+  padding: 56px 20px 48px;
+  background: var(--white);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  margin-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 5px;
+  background: linear-gradient(90deg, var(--teal), var(--gold), var(--coral), var(--purple));
+}
+.hero h1 {
+  font-family: 'Rubik', sans-serif;
+  font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
+}
+.hero h1 span { color: var(--gold); }
+.hero .sub {
+  font-size: 1.05rem;
+  color: var(--muted);
+  font-weight: 400;
+}
+.hero .pills {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  margin-top: 20px;
+}
+.hero .pill {
+  padding: 5px 16px;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.pill.p1 { background: var(--teal-bg); color: var(--teal); }
+.pill.p2 { background: var(--blue-bg); color: var(--blue); }
+.pill.p3 { background: var(--coral-bg); color: var(--coral); }
+.pill.p4 { background: var(--purple-bg); color: var(--purple); }
+.pill.p5 { background: var(--gold-bg); color: var(--gold); }
+
+/* ─── SECTION ─── */
+.section { margin-bottom: 44px; }
+.section-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+}
+.section-num {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Rubik', sans-serif;
+  font-size: 1.1rem; font-weight: 900;
+  flex-shrink: 0;
+  color: white;
+}
+.section-num.n1 { background: var(--gold); }
+.section-num.n2 { background: var(--teal); }
+.section-num.n3 { background: var(--blue); }
+.section-num.n4 { background: var(--coral); }
+.section-num.n5 { background: var(--purple); }
+.section-num.n6 { background: #2e86c1; }
+.section-num.n7 { background: #1e8449; }
+.section-num.n8 { background: #884ea0; }
+.section-title {
+  font-family: 'Rubik', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+/* ─── CARDS ─── */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 26px 24px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.3s, transform 0.3s;
+  position: relative;
+}
+.card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+.card .tag {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.tag.simple { background: var(--teal-bg); color: var(--teal); }
+.tag.compound { background: var(--blue-bg); color: var(--blue); }
+.tag.extract { background: var(--purple-bg); color: var(--purple); }
+.tag.series { background: var(--coral-bg); color: var(--coral); }
+.tag.rule { background: var(--gold-bg); color: var(--gold); }
+
+.card h3 {
+  font-family: 'Rubik', sans-serif;
+  font-size: 1.08rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.card p { font-size: 0.9rem; color: var(--text2); margin-bottom: 8px; }
+
+/* ─── FORMULA BOX ─── */
+.formula-box {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-top: 14px;
+  direction: ltr;
+  text-align: center;
+  overflow-x: auto;
+}
+.formula-box .katex { font-size: 1.25rem !important; }
+.formula-box .formula-note {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-family: 'Heebo', sans-serif;
+  direction: rtl;
+}
+
+/* ─── PARAMS TABLE ─── */
+.table-wrap {
+  background: var(--card);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.params-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.params-table th {
+  background: var(--bg2);
+  padding: 14px 18px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--text);
+  text-align: right;
+  border-bottom: 2px solid var(--border);
+}
+.params-table td {
+  padding: 13px 18px;
+  font-size: 0.88rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  vertical-align: top;
+  color: var(--text2);
+}
+.params-table tr:last-child td { border-bottom: none; }
+.params-table tr:hover td { background: rgba(0,0,0,0.015); }
+.param-name {
+  font-family: 'Rubik', monospace;
+  font-weight: 800;
+  font-size: 0.95rem;
+  direction: ltr;
+  text-align: center;
+  min-width: 60px;
+}
+.param-name.c-rate { color: var(--coral); }
+.param-name.c-nper { color: var(--blue); }
+.param-name.c-pmt { color: var(--purple); }
+.param-name.c-pv { color: var(--teal); }
+.param-name.c-fv { color: var(--gold); }
+.param-name.c-type { color: #7f8c8d; }
+
+.excel-bar {
+  background: var(--text);
+  color: #4af;
+  font-family: 'Rubik', monospace;
+  font-size: 1rem;
+  text-align: center;
+  padding: 14px 20px;
+  direction: ltr;
+  letter-spacing: 0.5px;
+  border-radius: 0 0 16px 16px;
+}
+
+/* ─── RULE LIST ─── */
+.rules-list { display: flex; flex-direction: column; gap: 14px; }
+.rule-item {
+  display: flex; gap: 16px; align-items: flex-start;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-shadow: var(--shadow);
+}
+.rule-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+.rule-icon.warn { background: var(--coral-bg); }
+.rule-icon.tip { background: var(--teal-bg); }
+.rule-icon.key { background: var(--gold-bg); }
+.rule-icon.info { background: var(--blue-bg); }
+.rule-content h4 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.rule-content p { font-size: 0.85rem; color: var(--text2); }
+
+/* ─── FLOW ─── */
+.flow-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 24px;
+  box-shadow: var(--shadow);
+}
+.flow-steps { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.flow-step {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 24px;
+  text-align: center;
+  max-width: 520px;
+  width: 100%;
+}
+.flow-step h4 { font-size: 0.95rem; color: var(--text); margin-bottom: 3px; }
+.flow-step p { font-size: 0.82rem; color: var(--muted); }
+.flow-step.highlight { border-color: var(--teal); background: var(--teal-bg); }
+.flow-step.start { border-color: var(--gold); background: var(--gold-bg); }
+.flow-arrow {
+  width: 2px; height: 26px;
+  background: var(--border);
+  position: relative;
+}
+.flow-arrow::after {
+  content: '▾';
+  position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+  font-size: 0.85rem; color: var(--muted);
+}
+
+/* ─── SUMMARY STRIP ─── */
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+.strip-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.strip-item .big {
+  font-family: 'Rubik', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  margin-bottom: 2px;
+}
+.strip-item .label { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+
+/* ─── FOOTER ─── */
+.footer {
+  text-align: center;
+  padding: 36px 20px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--border);
+  margin-top: 30px;
+}
+
+@media (max-width: 680px) {
+  .card-grid { grid-template-columns: 1fr; }
+  .container { padding: 20px 14px; }
+  .params-table th, .params-table td { padding: 10px 12px; font-size: 0.8rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- ═══════ HERO ═══════ -->
+<div class="hero">
+  <h1>יסודות המימון – <span>ערך עתידי FV</span></h1>
+  <div class="sub">סיכום כללים, נוסחאות, פרמטרים ויישומי Excel &bull; שיעורים 1–2</div>
+  <div class="pills">
+    <span class="pill p1">ריבית פשוטה</span>
+    <span class="pill p2">ריבית דריבית</span>
+    <span class="pill p3">סדרות PMT</span>
+    <span class="pill p4">חילוץ נעלמים</span>
+    <span class="pill p5">בחירה בין חלופות</span>
+  </div>
+</div>
+
+<!-- ═══════ 1 – CONCEPT ═══════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num n1">1</span>
+    <span class="section-title">עקרון היסוד – מהו ערך עתידי?</span>
+  </div>
+  <div class="rules-list">
+    <div class="rule-item">
+      <div class="rule-icon key">💰</div>
+      <div class="rule-content">
+        <h4>FV – Future Value – ערך עתידי</h4>
+        <p>הסכום הכולל הנצבר בעתיד, כולל הקרן וכל הריבית שנצברה. מבטא את תוצאת ההשקעה או ההלוואה בחלוף זמן.</p>
+      </div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon info">🏦</div>
+      <div class="rule-content">
+        <h4>PV – Present Value – ערך נוכחי</h4>
+        <p>הסכום הראשוני בהווה (זמן 0) – סכום הפקדה או קרן הלוואה. נקרא גם "קרן מקורית" או "סכום התחלתי".</p>
+      </div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon key">⏳</div>
+      <div class="rule-content">
+        <h4>ריבית פשוטה מול ריבית דריבית</h4>
+        <p><strong>ריבית פשוטה</strong> – מצוינת במפורש בשאלה. הריבית מחושבת תמיד על הקרן המקורית בלבד, ומסוכמת.<br>
+        <strong>ריבית דריבית (ברירת מחדל!)</strong> – אם לא נאמר "ריבית פשוטה", תמיד משתמשים בריבית דריבית. הריבית נצברת גם על ריבית קודמת – שרשרת מכפלות → חזקה.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 2 – FORMULAS ═══════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num n2">2</span>
+    <span class="section-title">ארבע הנוסחאות המתמטיות</span>
+  </div>
+  <div class="card-grid">
+
+    <div class="card">
+      <span class="tag simple">ריבית פשוטה · קבועה</span>
+      <h3>סכום יחיד, ריבית פשוטה קבועה</h3>
+      <p>הפקדה/הלוואה חד-פעמית, ריבית אחת קבועה, מצויין במפורש "ריבית פשוטה".</p>
+      <div class="formula-box">
+        <span class="latex">FV = PV \cdot \left(1 + r \cdot n\right)</span>
+        <span class="formula-note">r = ריבית תקופתית &nbsp;·&nbsp; n = מספר תקופות</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="tag simple">ריבית פשוטה · משתנה</span>
+      <h3>סכום יחיד, ריבית פשוטה משתנה</h3>
+      <p>ריביות שונות בתקופות שונות – סוכמים את כל מכפלות הריבית×תקופה בתוך הסוגריים.</p>
+      <div class="formula-box">
+        <span class="latex">FV = PV \cdot \left(1 + r_1 \cdot n_1 + r_2 \cdot n_2 + \cdots\right)</span>
+        <span class="formula-note">כל ריבית מוכפלת במספר התקופות שלה ומסוכמת</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="tag compound">ריבית דריבית · קבועה</span>
+      <h3>סכום יחיד, ריבית דריבית קבועה</h3>
+      <p><strong>ברירת מחדל!</strong> הפקדה/הלוואה חד-פעמית, ריבית אחת קבועה. מנגנון חזקה.</p>
+      <div class="formula-box">
+        <span class="latex">FV = PV \cdot \left(1 + r\right)^{n}</span>
+        <span class="formula-note">שרשרת מכפלות → חזקה &nbsp;·&nbsp; ברירת מחדל כשלא מצוין "פשוטה"</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="tag compound">ריבית דריבית · משתנה</span>
+      <h3>סכום יחיד, ריבית דריבית משתנה</h3>
+      <p>כשהריבית משתנה – מכפלת חזקות נפרדת לכל תקופת ריבית.</p>
+      <div class="formula-box">
+        <span class="latex">FV = PV \cdot \left(1+r_1\right)^{n_1} \cdot \left(1+r_2\right)^{n_2} \cdot \;\cdots</span>
+        <span class="formula-note">כל מקטע ריבית – חזקה נפרדת במכפלה</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════ 3 – EXCEL PARAMS ═══════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num n3">3</span>
+    <span class="section-title">פרמטרי ה-Excel – סדר הזנה ומשמעות</span>
+  </div>
+  <div class="table-wrap">
+    <table class="params-table">
+      <thead>
+        <tr><th style="width:80px;">פרמטר</th><th style="width:110px;">תפקיד</th><th>משמעות והסבר</th><th>כללי הזנה</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="param-name c-rate">rate</td>
+          <td><strong>ריבית</strong></td>
+          <td>שיעור הריבית <strong>לתקופה אחת</strong></td>
+          <td>ריבית שנתית → rate שנתי. ריבית חודשית → rate חודשי. <strong>בסדרות: חייבת להיות ריבית לתקופת תשלום!</strong></td>
+        </tr>
+        <tr>
+          <td class="param-name c-nper">nper</td>
+          <td><strong>מספר תקופות</strong></td>
+          <td>מספר תקופות הריבית/תשלומים</td>
+          <td>ריבית שנתית → מספר שנים. ריבית חודשית → מספר חודשים. <strong>בסדרות: nper = מספר התשלומים!</strong></td>
+        </tr>
+        <tr>
+          <td class="param-name c-pmt">pmt</td>
+          <td><strong>תשלום תקופתי</strong></td>
+          <td>סכום קבוע בסדרה</td>
+          <td>אין סדרה → <strong>0</strong>. הפקדות → סימן <strong>שלילי (−)</strong>. משיכות/תקבולים → סימן <strong>חיובי (+)</strong>.</td>
+        </tr>
+        <tr>
+          <td class="param-name c-pv">[pv]</td>
+          <td><strong>ערך נוכחי</strong></td>
+          <td>הפקדה/הלוואה חד-פעמית בהווה</td>
+          <td>הפקדה → <strong>(−)</strong>. הלוואה → <strong>(+)</strong>. בשלבים עוקבים: PV = FV הקודם <strong>בסימן הפוך</strong>.</td>
+        </tr>
+        <tr>
+          <td class="param-name c-fv">fv</td>
+          <td><strong>ערך עתידי</strong></td>
+          <td>הסכום הכולל שנצבר בעתיד</td>
+          <td>בדרך כלל הנדרש לחישוב. כשנתון – משמש לחילוץ פרמטרים אחרים.</td>
+        </tr>
+        <tr>
+          <td class="param-name c-type">[type]</td>
+          <td><strong>עיתוי</strong></td>
+          <td>תחילת/סוף תקופה</td>
+          <td><strong>0</strong> (ברירת מחדל): תשלומים בסוף תקופה. <strong>1</strong>: תשלומים בתחילת תקופה. רלוונטי <strong>רק</strong> בסדרות!</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="excel-bar">=FV( rate, nper, pmt, [pv], [type] )</div>
+  </div>
+</div>
+
+<!-- ═══════ 4 – KEY RULES ═══════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num n4">4</span>
+    <span class="section-title">כללי זהב</span>
+  </div>
+  <div class="rules-list">
+
+    <div class="rule-item">
+      <div class="rule-icon warn">⚠️</div>
+      <div class="rule-content">
+        <h4>ברירת המחדל היא ריבית דריבית</h4>
+        <p>אם לא נאמר במפורש "ריבית פשוטה" – תמיד מחשבים ריבית דריבית (חזקה), ואפשר להשתמש בפונקציות Excel. רק כשכתוב מפורשות "ריבית פשוטה" – נוסחה מתמטית בלבד.</p>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <div class="rule-icon tip">✅</div>
+      <div class="rule-content">
+        <h4>חפיפת יחידות: rate ↔ nper</h4>
+        <p>חייבת להיות חפיפה בפרק הזמן של הריבית לבין מספר התקופות. ריבית שנתית → nper בשנים. ריבית חודשית → nper בחודשים. ריבית חצי-שנתית → nper בחצאי שנים.</p>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <div class="rule-icon warn">⚠️</div>
+      <div class="rule-content">
+        <h4>סימני תזרימים (מינוס/פלוס)</h4>
+        <p>באקסל: הפקדות וכסף יוצא → <strong>סימן שלילי (−)</strong>. הלוואות, תקבולים וכסף נכנס → <strong>סימן חיובי (+)</strong>. הסימנים קריטיים לתוצאה נכונה!</p>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <div class="rule-icon key">🔗</div>
+      <div class="rule-content">
+        <h4>חישוב רב-שלבי: FV → PV בסימן הפוך</h4>
+        <p>כשיש שינוי בריבית, סכום נוסף, או שבירת סדרה → כל שלב = עמודה נפרדת. ה-FV של כל שלב הופך ל-PV של השלב הבא <strong>בסימן הפוך</strong>.</p>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <div class="rule-icon info">📊</div>
+      <div class="rule-content">
+        <h4>מספר עמודות = מספר "הפרעות"</h4>
+        <p>ריבית משתנה → עמודה לכל ריבית. הפקדה נוספת → עמודה חדשה. שינוי סכום/הפסקה בסדרה → עמודה חדשה. כל שינוי = שלב חישובי נפרד.</p>
+      </div>
+    </div>
+
+    <div class="rule-item">
+      <div class="rule-icon tip">✅</div>
+      <div class="rule-content">
+        <h4>אין מחלקים ריביות!</h4>
+        <p>אי אפשר לחלק ריבית שנתית ב-12 כדי לקבל ריבית חודשית (בגלל מנגנון ריבית דריבית). יש שיטות ייעודיות שיילמדו בהמשך.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════ 5 – SERIES ═══════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num n5">5</span>
+    <span class="section-title">סדרות (PMT) – מתי ואיך?</span>
+  </div>
+  <div class="card-grid">
+
+    <div class="card">
+      <span class="tag series">הגדרה</span>
+      <h3>מהי סדרה? כלל סר"ת</h3>
+      <p>סדרה קיימת כאשר <strong>שלושת התנאים</strong> מתקיימים יחד:</p>
+      <p style="color:var(--text);font-weight:600;"><strong>ס</strong>כום קבוע · <strong>ר</strong>יבית קבועה · <strong>ת</strong>דירות קבועה</p>
+      <p>מילות מפתח: "בסוף כל חודש", "בתחילת כל שנה", "הפקדה חודשית קבועה".</p>
+    </div>
+
+    <div class="card">
+      <span class="tag series">הזנה</span>
+      <h3>כללי הזנה בסדרות</h3>
+      <p><strong>rate</strong> = ריבית <u>לתקופת תשלום</u>.<br>
+      <strong>nper</strong> = <u>מספר התשלומים</u> (לא מספר השנים!).<br>
+      <strong>pmt</strong> = סכום ההפקדה הקבוע (בסימן שלילי).<br>
+      <strong>pv</strong> = 0 אם אין הפקדה חד-פעמית נוספת.</p>
+    </div>
+
+    <div class="card">
+      <span class="tag series">type</span>
+      <h3>מתי type = 1?</h3>
+      <p><strong>רק</strong> כשמדובר בסדרה <strong>ו</strong>מצויין שההפקדות בתחילת כל תקופה <strong>ו</strong>קיים פער של תקופה אחת בין ההפקדה האחרונה למועד הצבירה.</p>
+      <p>אם ההפקדה האחרונה חופפת למועד המשיכה → <strong>type = 0</strong>.</p>
+    </div>
+
+    <div class="card">
+      <span class="tag series">שבירת סדרה</span>
+      <h3>שינוי ריבית / הפסקה / שינוי סכום</h3>
+      <p>כל שינוי → שלב חישוב נפרד (עמודה חדשה). ה-FV של הסדרה הראשונה הופך ל-PV של השלב הבא בסימן הפוך. משיכות → pmt חיובי.</p>
+      <div class="formula-box" style="margin-top:10px;">
+        <span class="latex" style="font-size:0.95rem;">\text{nper}_{\text{סדרה}} = t_{\text{אחרון}} - t_{\text{ראשון}} + 1</span>
+        <span class="formula-note">טיפ לספירת תשלומים בסדרה</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════ 6 – EXTRACTION ═══════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num n6">6</span>
+    <span class="section-title">חילוץ נעלמים כש-FV נתון</span>
+  </div>
+  <div class="card-grid">
+
+    <div class="card">
+      <span class="tag extract">חילוץ ריבית</span>
+      <h3>פונקציית RATE</h3>
+      <p>כשידועים FV, PV, nper – מחלצים את הריבית התקופתית.</p>
+      <div class="formula-box">
+        <span class="latex">r = \left(\frac{FV}{PV}\right)^{\!\tfrac{1}{n}} - 1 \;\;\Longleftarrow\;\; FV = PV \cdot (1+r)^n</span>
+      </div>
+      <div style="background:var(--text);color:#4af;font-family:'Rubik',monospace;font-size:0.88rem;text-align:center;padding:10px;border-radius:0 0 10px 10px;margin-top:-1px;direction:ltr;">=RATE(nper, pmt, pv, [fv])</div>
+      <p style="margin-top:8px;">אם רוצים ריבית שנתית → nper = מספר שנים. אם חודשית → nper = מספר חודשים.</p>
+    </div>
+
+    <div class="card">
+      <span class="tag extract">חילוץ תקופות</span>
+      <h3>פונקציית NPER</h3>
+      <p>כשידועים FV, PV, rate – מחלצים את מספר תקופות הצבירה.</p>
+      <div class="formula-box">
+        <span class="latex">n = \frac{\ln\!\left(\frac{FV}{PV}\right)}{\ln(1+r)} \;\;\Longleftarrow\;\; FV = PV \cdot (1+r)^n</span>
+      </div>
+      <div style="background:var(--text);color:#4af;font-family:'Rubik',monospace;font-size:0.88rem;text-align:center;padding:10px;border-radius:0 0 10px 10px;margin-top:-1px;direction:ltr;">=NPER(rate, pmt, pv, [fv])</div>
+      <p style="margin-top:8px;">התוצאה ביחידות הזמן של הריבית. ריבית חודשית → תוצאה בחודשים. להמרה לשנים – חלק ב-12.</p>
+    </div>
+
+    <div class="card">
+      <span class="tag extract">חילוץ תשלום</span>
+      <h3>פונקציית PMT</h3>
+      <p>כשידועים FV, rate, nper – מחלצים את סכום ההפקדה התקופתי הנדרש.</p>
+      <div class="formula-box">
+        <span class="latex">PMT = \frac{FV}{\displaystyle\frac{(1+r)^n - 1}{r}}</span>
+        <span class="formula-note">בסדרה רגילה (תום תקופה)</span>
+      </div>
+      <div style="background:var(--text);color:#4af;font-family:'Rubik',monospace;font-size:0.88rem;text-align:center;padding:10px;border-radius:0 0 10px 10px;margin-top:-1px;direction:ltr;">=PMT(rate, nper, [pv], fv, [type])</div>
+    </div>
+
+    <div class="card">
+      <span class="tag extract">חילוץ ערך נוכחי</span>
+      <h3>פונקציית PV</h3>
+      <p>כשידועים FV, rate, nper – מחלצים כמה צריך להפקיד היום.</p>
+      <div class="formula-box">
+        <span class="latex">PV = \frac{FV}{\left(1 + r\right)^{n}}</span>
+        <span class="formula-note">היוון – "מביאים" ערך עתידי להווה</span>
+      </div>
+      <div style="background:var(--text);color:#4af;font-family:'Rubik',monospace;font-size:0.88rem;text-align:center;padding:10px;border-radius:0 0 10px 10px;margin-top:-1px;direction:ltr;">=PV(rate, nper, pmt, [fv], [type])</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════ 7 – DECISION FLOW ═══════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num n7">7</span>
+    <span class="section-title">תהליך פתרון – תרשים החלטה</span>
+  </div>
+  <div class="flow-wrap">
+    <div class="flow-steps">
+
+      <div class="flow-step start">
+        <h4>🔍 שלב 1: זיהוי הנדרש</h4>
+        <p>מה ידוע? מה הנעלם? האם FV ידוע (חילוץ) או שצריך לחשב FV?</p>
+      </div>
+      <div class="flow-arrow"></div>
+
+      <div class="flow-step">
+        <h4>📋 שלב 2: סיווג סוג הריבית</h4>
+        <p>כתוב "ריבית פשוטה"? → נוסחה מתמטית בלבד. לא כתוב? → ריבית דריבית (ברירת מחדל) → Excel.</p>
+      </div>
+      <div class="flow-arrow"></div>
+
+      <div class="flow-step">
+        <h4>📌 שלב 3: בדיקת סדרה (סר"ת)</h4>
+        <p>יש תשלום תקופתי קבוע? → PMT ≠ 0. אם לא → PMT = 0.</p>
+      </div>
+      <div class="flow-arrow"></div>
+
+      <div class="flow-step">
+        <h4>🔢 שלב 4: מספר שלבי חישוב</h4>
+        <p>ריבית אחת ללא הפרעות → שלב אחד. שינוי ריבית / הפקדה נוספת / שבירת סדרה → עמודה לכל מקטע.</p>
+      </div>
+      <div class="flow-arrow"></div>
+
+      <div class="flow-step highlight">
+        <h4>✅ שלב 5: ביצוע</h4>
+        <p>הזנת rate, nper, pmt, pv, type בכל שלב. FV של כל שלב → PV בסימן הפוך לשלב הבא.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 8 – ALTERNATIVES ═══════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num n8">8</span>
+    <span class="section-title">בחירה בין חלופות</span>
+  </div>
+  <div class="rules-list">
+    <div class="rule-item">
+      <div class="rule-icon key">⚖️</div>
+      <div class="rule-content">
+        <h4>השוואה חייבת להיות באותה נקודת זמן</h4>
+        <p>מחשבים FV לכל חלופה בנפרד <strong>לאותו מועד</strong>. בחלופות הכנסה → עדיפה זו עם FV הגבוה ביותר. בחלופות עלות → עדיפה זו עם FV הנמוך ביותר.</p>
+      </div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-icon info">🔀</div>
+      <div class="rule-content">
+        <h4>ריבית אדישות</h4>
+        <p>הריבית שבה שתי חלופות שוות ערך. מציבים PV = חלופה אחת, FV = חלופה שניה, ומחלצים rate.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ QUICK REF ═══════ -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num" style="background:var(--text);">⚡</span>
+    <span class="section-title">סיכום מהיר – פונקציות Excel</span>
+  </div>
+  <div class="summary-strip">
+    <div class="strip-item">
+      <div class="big" style="color:var(--gold);">FV</div>
+      <div class="label">חישוב ערך עתידי</div>
+    </div>
+    <div class="strip-item">
+      <div class="big" style="color:var(--coral);">RATE</div>
+      <div class="label">חילוץ ריבית</div>
+    </div>
+    <div class="strip-item">
+      <div class="big" style="color:var(--blue);">NPER</div>
+      <div class="label">חילוץ מספר תקופות</div>
+    </div>
+    <div class="strip-item">
+      <div class="big" style="color:var(--purple);">PMT</div>
+      <div class="label">חילוץ / הגדרת סדרה</div>
+    </div>
+    <div class="strip-item">
+      <div class="big" style="color:var(--teal);">PV</div>
+      <div class="label">חילוץ ערך נוכחי</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div style="margin-bottom:8px;font-size:0.95rem;color:var(--text);font-weight:700;">ד״ר שי צבאן האגדי</div>
+  <div style="margin-bottom:14px;"><a href="mailto:shay.tsaban@gmail.com" style="color:var(--blue);text-decoration:none;font-size:0.88rem;font-weight:500;">shay.tsaban@gmail.com</a></div>
+  <div>סיכום אינפוגרפי מתוך חומרי הלימוד – יסודות המימון, שיעורים 1–2 – ערך עתידי FV</div>
+</div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll('.latex').forEach(function(el) {
+    try {
+      katex.render(el.textContent, el, {
+        displayMode: true,
+        throwOnError: false,
+        output: 'html'
+      });
+    } catch(e) {}
+  });
+});
+</script>
+</body>
+</html>
