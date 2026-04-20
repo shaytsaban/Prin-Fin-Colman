@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ערך נוכחי של סדרות - מאסטר קלאס אינטראקטיבי</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;800&family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Heebo', 'sans-serif'],
+                        heading: ['Rubik', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        excel: {
+                            light: '#e8f5e9',
+                            DEFAULT: '#107c41',
+                            dark: '#0b5e2f',
+                            border: '#a3d5b7'
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'bounce-soft': 'bounceSoft 2s infinite',
+                        'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+                        'pulse-glow': 'pulseGlow 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(30px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        bounceSoft: { '0%, 100%': { transform: 'translateY(-3%)' }, '50%': { transform: 'translateY(0)' } },
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-2px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(4px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-6px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(6px, 0, 0)' }
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { boxShadow: '0 0 0 0 rgba(16, 124, 65, 0.4)' },
+                            '50%': { boxShadow: '0 0 0 8px rgba(16, 124, 65, 0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- React, ReactDOM, Babel, Confetti -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.6/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f4f7fb;
+            background-image: 
+                linear-gradient(rgba(14, 165, 233, 0.03) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(14, 165, 233, 0.03) 2px, transparent 2px);
+            background-size: 40px 40px;
+            background-attachment: fixed;
+        }
+        .dir-ltr { direction: ltr; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        
+        /* Remove arrows from number inputs */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Error Boundary Definition ---
+        class ErrorBoundary extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { hasError: false, error: null };
+            }
+            static getDerivedStateFromError(error) {
+                return { hasError: true, error };
+            }
+            render() {
+                if (this.state.hasError) {
+                    return (
+                        <div className="p-8 m-8 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 animate-fade-in text-center max-w-2xl mx-auto mt-20">
+                            <h2 className="text-3xl font-bold mb-4">אופס! משהו השתבש.</h2>
+                            <p className="mb-6 text-lg">שגיאה התרחשה בטעינת המערכת. הנה פרטי השגיאה:</p>
+                            <div dir="ltr" className="font-mono text-sm bg-white p-6 rounded-xl shadow-inner overflow-auto text-left border border-rose-100">
+                                {this.state.error && this.state.error.toString()}
+                            </div>
+                        </div>
+                    );
+                }
+                return this.props.children;
+            }
+        }
+
+        // --- Utils ---
+        const fireConfetti = (type = 'success') => {
+            if (typeof confetti !== 'function') return;
+            if (type === 'success') {
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#107c41', '#34d399', '#fde047'] });
+            } else if (type === 'logic') {
+                confetti({ particleCount: 100, spread: 60, origin: { y: 0.6 }, colors: ['#0ea5e9', '#38bdf8', '#bae6fd'] });
+            } else if (type === 'victory') {
+                const duration = 4000; const end = Date.now() + duration;
+                (function frame() {
+                    confetti({ particleCount: 6, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#107c41', '#0ea5e9', '#f59e0b', '#fbbf24'] });
+                    confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#107c41', '#0ea5e9', '#f59e0b', '#fbbf24'] });
+                    if (Date.now() < end) requestAnimationFrame(frame);
+                }());
+            }
+        };
+
+        const formatCurrency = (val) => {
+            const num = parseFloat(val);
+            if (isNaN(num)) return val;
+            return num.toLocaleString('he-IL');
+        };
+
+        // --- Shared Components ---
+        const Card = ({ children, className = "", delay = "0ms" }) => (
+            <div className={`glass-card rounded-3xl shadow-xl p-6 md:p-8 border border-slate-200 animate-slide-up ${className}`} style={{ animationDelay: delay }}>
+                {children}
+            </div>
+        );
+
+        const Button = ({ onClick, children, variant = "primary", className = "", disabled=false }) => {
+            const baseStyle = "px-6 py-3 rounded-xl font-bold transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-2";
+            const variants = {
+                primary: "bg-brand-600 text-white hover:bg-brand-500 shadow-md",
+                success: "bg-emerald-500 text-white hover:bg-emerald-400 shadow-md",
+                excel: "bg-excel text-white hover:bg-excel-dark shadow-md animate-pulse-glow",
+                outline: "border-2 border-slate-300 text-slate-600 hover:bg-slate-50 hover:border-slate-400",
+                danger: "bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100",
+                warning: "bg-amber-100 text-amber-700 border border-amber-300 hover:bg-amber-200 shadow-sm"
+            };
+            return (
+                <button disabled={disabled} onClick={onClick} className={`${baseStyle} ${variants[variant]} ${className}`}>
+                    {children}
+                </button>
+            );
+        };
+
+        const CashFlowTable = ({ data }) => (
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm mt-4">
+                <div className="bg-slate-100 px-4 py-3 border-b border-slate-200 flex items-center gap-2 font-bold text-slate-700">
+                    <span>📊</span> לוח תזרימים מפורט
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-right text-sm">
+                        <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
+                            <tr>
+                                <th className="px-4 py-3 font-semibold">זמן / תקופה</th>
+                                <th className="px-4 py-3 font-semibold text-center">מס' תשלומים</th>
+                                <th className="px-4 py-3 font-semibold text-center">תזרים</th>
+                                <th className="px-4 py-3 font-semibold">הערות ורציונל</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {data.map((row, idx) => (
+                                <tr key={idx} className="hover:bg-brand-50 transition-colors">
+                                    <td className="px-4 py-3 font-bold text-brand-900 whitespace-nowrap">{row.time}</td>
+                                    <td className="px-4 py-3 text-center font-mono bg-slate-50 text-slate-600">{row.count}</td>
+                                    <td className="px-4 py-3 text-center">
+                                        <span className={`font-mono font-bold px-3 py-1 rounded-full ${row.flow === '0' ? 'bg-slate-100 text-slate-500' : row.flow.includes('?') ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`} dir="ltr">
+                                            {row.flow}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-slate-600">{row.note}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+
+        // --- Data Models ---
+        const DATA = [
+            {
+                id: 1,
+                title: "האדריכלית המבטיחה",
+                difficulty: "בינונית",
+                rationale: "תרגיל זה עוסק ב'סדרה דחויה'. כאשר תזרימי המזומנים אינם מתחילים מיד, אלא רק בעתיד, יש לאפיין את תזרימי המזומנים, ולפעול כך שסדרת התזרימים המאוחרת ביותר מטופלת תחילה. אסטרטגיית הפתרון מחייבת שני שלבים: (1) חישוב הערך הנוכחי של הסדרה, אשר יוביל לנקודת הזמן המוקדמת בתקופת תשלום אחת מהתזרים הראשון. (2) היוון התוצאה כסכום חד-פעמי אחורה להיום (זמן אפס).",
+                story: "דנה, סטודנטית לאדריכלות, צפויה לסיים את לימודיה בעוד 6 שנים. החל מהשנה ה-7 היא תתחיל לעבוד ותקבל שכר של 250,000 לשנה שישולם בסוף כל שנה. היא מתכננת לעבוד במקצוע במשך 35 שנים.\nמשרד יזמות הציע לדנה לרכוש את 'זכויות השכר' שלה מראש, ולשלם לה היום 3,000,000 במזומן.\nהריבית השנתית בשוק היא 6%.\nהאם כדאי לה להסכים להצעה?",
+                cashFlow: [
+                    { time: "0 עד 6", count: "0", flow: "0", note: "תקופת המתנה (לימודים וסטאז')" },
+                    { time: "7 עד 41", count: "35 שנות עבודה", flow: "250,000", note: "סדרת משכורות שנתית (סוף תקופה)" }
+                ],
+                steps: [
+                    {
+                        type: 'logic',
+                        question: "יש לאפיין את תזרימי המזומנים, ולפעול כך שסדרת תזרימי המזומנים המאוחרת ביותר מטופלת תחילה. לכן, בשלב הראשון נחשב את הערך הנוכחי (PV) של סדרת המשכורות. מהי נקודת הזמן שאליה נגיע כשנחשב את הערך הנוכחי של סדרה זו?",
+                        context: "עליך ליישם את הכלל לגבי חישוב ערך נוכחי של סדרות כאשר התשלום מתבצע בסוף תקופה (Type=0).",
+                        options: [
+                            { id: 'a', text: "נגיע לשנת 7, בדיוק למועד שבו היא מקבלת את המשכורת הראשונה.", wrongFeedback: "שגיאה! כאשר מזינים Type=0 (תשלום בסוף תקופה), כברירת מחדל אקסל מחשב את הערך הנוכחי לנקודת זמן המוקדמת בתקופת תשלום אחת ממועד התזרים הראשון." },
+                            { id: 'b', text: "נגיע לשנת 6 (נקודת זמן המוקדמת בתקופת תשלום אחת ממועד התזרים הראשון).", wrongFeedback: "" },
+                            { id: 'c', text: "נגיע לשנת 0, האקסל מזהה לבד מתי הלימודים הסתיימו.", wrongFeedback: "לא נכון. פונקציית ה-PV אינה מביאה בחשבון את תקופת ההמתנה אלא אם נגדיר זאת במפורש." }
+                        ],
+                        correctOptionId: 'b',
+                        explanation: "מעולה! הכלל החשוב מכל: חישוב PV של סדרה רגילה (סוף תקופה, Type=0) מוביל תמיד לנקודת זמן המוקדמת בתקופת תשלום אחת ממועד התזרים הראשון. לכן, כיוון שהתזרים הראשון הוא בזמן 7, נגיע לזמן 6."
+                    },
+                    {
+                        type: 'excel',
+                        title: "שלב 1: חישוב שווי סדרת המשכורות בזמן 6",
+                        instruction: "הזן את הנתונים כדי לחשב מה יהיה שווי המשכורות של דנה בנקודת הזמן 6. שימו לב: בסימולטור זה, כמו במבחן, יש להזין את הריבית תמיד ללא סימן %.",
+                        targetField: "pv",
+                        generalHint: "כמה תשלומים קיימים בסדרה שאיברה הראשון מופיע בזמן 7?",
+                        expected: { rate: "6", nper: "35", pmt: "250000", pv: "-3624558", fv: "0", type: "0" },
+                        successMessage: "יצאת תותח! שווי כל המשכורות בנקודת הזמן 6 חושב היטב.",
+                        hints: {
+                            rate: "הריבית השנתית (הזן 6, ללא סימן %)",
+                            nper: "כמה תשלומים קיימים בסדרה שאיברה הראשון בזמן 7?",
+                            pmt: "סכום המשכורת השנתית (ללא פסיקים)",
+                            fv: "אין סכום חד פעמי בסוף, לכן 0",
+                            type: "המשכורת משולמת בסוף כל שנה (0)"
+                        },
+                        explanation: "השווי של כל 35 שנות העבודה שלה, כשהוא מחושב נכון לזמן 6, עומד על 3,624,558."
+                    },
+                    {
+                        type: 'excel',
+                        title: "שלב 2: התאמה לאחור (היוון) לזמן 0",
+                        instruction: "כעת, יש בידינו סכום חד-פעמי בזמן 6 (ה-PV מהשלב הקודם). נרצה לבצע התאמה לאחור (היוון) של הסכום הזה להיום (זמן 0) כדי שנוכל להשוות אותו להצעת היזם.",
+                        targetField: "pv",
+                        generalHint: "הערך הנוכחי (PV) שקיבלנו בצעד הקודם, יהווה את הערך העתידי (FV) של השלב העוקב (בהיפוך סימן).",
+                        expected: { rate: "6", nper: "6", pmt: "0", pv: "-2555183", fv: "3624558", type: "0" },
+                        successMessage: "תשובה פנטסטית! ביצעת התאמה מדויקת של הסכום להיום.",
+                        hints: {
+                            rate: "אותה ריבית (הזן 6, ללא סימן %)",
+                            nper: "כמה שנים אנחנו צריכים לעשות התאמה לאחור מזמן 6 לזמן 0?",
+                            pmt: "בשלב הזה אין תשלומים תקופתיים (זה היוון של סכום חד פעמי)",
+                            fv: "התוצאה מהשלב הקודם הופכת לערך עתידי חיובי (3624558)",
+                            type: "הזן 0 כברירת מחדל, אינו משפיע על סכום חד פעמי"
+                        },
+                        explanation: "הערך הנוכחי של מסלול האדריכלות היום הוא 2,555,183. מכיוון שהיזם מציע 3,000,000 במזומן מיד, משתלם לדנה לקחת את ההצעה שלו!"
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "תכנון הפרישה של דן",
+                difficulty: "גבוהה",
+                rationale: "זוהי שאלת 'איזון אקטוארי'. יש לאפיין תחילה את תזרימי המזומנים ולעבוד עם הסדרה שלגביה הנתונים מלאים (במקרה זה, המשיכות בפנסיה). מחשבים את גודל הקופה הדרוש ביום הפרישה, ואז משתמשים בתוצאה כערך עתידי (FV) כדי לגזור אחורה את גובה ההפקדה החודשית הדרושה.",
+                story: "דן, היום בן 30, מתכנן את עתידו. הוא מתכנן להפקיד בסוף כל חודש סכום קבוע, עד שיפרוש בגיל 65.\nביום פרישתו (גיל 65), הוא יפסיק להפקיד, ויתחיל למשוך קצבה בסך 12,000 בתחילת כל חודש, למשך 20 שנים (עד גיל 85).\nריבית החיסכון והפנסיה נתונה ועומדת על 0.4% לחודש.\nמהו הסכום שעליו להפקיד מידי חודש?",
+                cashFlow: [
+                    { time: "גיל 30 עד 65", count: "420 חודשים (35 שנה)", flow: "? (PMT)", note: "סדרת הפקדות בסוף כל חודש (Type 0)" },
+                    { time: "גיל 65 עד 85", count: "240 חודשים (20 שנה)", flow: "12,000", note: "סדרת משיכות בתחילת כל חודש (Type 1)" }
+                ],
+                steps: [
+                    {
+                        type: 'logic',
+                        question: "דן מושך את הקצבה שלו בתחילת כל חודש. מה תהיה ההשפעה של נתון זה על נקודת הזמן אליה נגיע בחישוב הערך הנוכחי של הפנסיה (PV)?",
+                        context: "זכור את המשמעות של הגדרת Type כ-1 לעומת Type כ-0.",
+                        options: [
+                            { id: 'a', text: "נזין Type=1, ונגיע לחודש אחד לפני יום הולדת 65 כברירת מחדל.", wrongFeedback: "לא נכון. הכלל של הקדמה בתקופה אחת שייך אך ורק למקרה של סוף תקופה (Type=0)." },
+                            { id: 'b', text: "נזין Type=1. במקרה כזה הערך הנוכחי הסדרתי יוביל בדיוק למועד התזרים הראשון של הסדרה - גיל 65.", wrongFeedback: "" }
+                        ],
+                        correctOptionId: 'b',
+                        explanation: "מדויק להפליא. כשמגדירים תחילת תקופה (Type=1), הערך הנוכחי מחושב בדיוק למועד בו מתבצעת המשיכה הראשונה."
+                    },
+                    {
+                        type: 'excel',
+                        title: "שלב 1: חישוב הקופה הנדרשת בפרישה",
+                        instruction: "חשב את הערך הנוכחי (PV) של סדרת המשיכות, נכון לגיל 65.",
+                        targetField: "pv",
+                        generalHint: "כמה תשלומים קיימים בסדרה מגיל 65 עד 85? זכור להזין את הריבית ללא סימן %.",
+                        expected: { rate: "0.4", nper: "240", pmt: "12000", pv: "-1855103", fv: "0", type: "1" },
+                        successMessage: "הפצצת! הקופה הדרושה מחושבת בצורה חלקה ומדויקת.",
+                        hints: {
+                            rate: "הריבית החודשית (הזן 0.4 ללא %)",
+                            nper: "כמה חודשים יש ב-20 שנות פנסיה?",
+                            pmt: "הקצבה החודשית של דן (ללא פסיקים)",
+                            fv: "המטרה היא לרוקן את הקופה בסוף, לכן היתרה היא 0",
+                            type: "המשיכה מתבצעת בתחילת חודש, הזן 1"
+                        },
+                        explanation: "מעולה! כדי למשוך את הקצבה שדן רוצה, עליו להגיע ליום ההולדת ה-65 שלו כשיש לו בקופה בדיוק 1,855,103."
+                    },
+                    {
+                        type: 'excel',
+                        title: "שלב 2: חישוב ההפקדה החודשית הנדרשת",
+                        isPmtCalculation: true,
+                        targetField: "pmt",
+                        instruction: "ידוע שדן צריך להגיע ל-1,855,103 בגיל 65. נשתמש בזה כערך עתידי (FV). חלץ את סכום ההפקדה החודשית (PMT) הנדרש במשך 35 השנים שנותרו לו.",
+                        generalHint: "הערך הנוכחי (PV) שחישבנו קודם הופך לערך העתידי (FV) של השלב העוקב (בהיפוך סימן), כדי שנוכל לחלץ ממנו את סדרת ההפקדות.",
+                        expected: { rate: "0.4", nper: "420", pmt: "-1708", pv: "0", fv: "1855103", type: "0" },
+                        successMessage: "ביצוע מרשים! מצאת את ההפקדה החודשית הנדרשת.",
+                        hints: {
+                            rate: "אותה ריבית (הזן 0.4 ללא %)",
+                            nper: "כמה חודשים יש ב-35 שנים של חיסכון? (35 * 12)",
+                            pv: "דן מתחיל היום עם 0 בחשבון",
+                            fv: "יעד הצבירה מהשלב הקודם (1855103)",
+                            type: "ההפקדות לפנסיה הן בסוף כל חודש (0)"
+                        },
+                        explanation: "מושלם! אם דן יפקיד 1,708 בכל סוף חודש, הוא יגיע ליעד."
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "פרויקט בשלבים (אתגר למתקדמים)",
+                difficulty: "מתקדם",
+                rationale: "יש לאפיין את תזרימי המזומנים ולפעול כך שסדרת התזרימים המאוחרת ביותר מטופלת תחילה. מחשבים את שוויה, והופכים את התוצאה לערך עתידי (FV). מבצעים התאמה לאחור על פני תקופת ההמתנה, ולבסוף מגלגלים את הסכום יחד עם הסדרה הראשונה עד לזמן אפס.",
+                story: "חברת היי-טק מבצעת פרויקט בן 15 חודשים המחולק ל-3 שלבים:\nשלב א' (חודשים 1 עד 5): הפרויקט מניב 12,000 בסוף כל חודש. הריבית: 1.2% לחודש.\nשלב ב' (חודשים 6 עד 10): תקופת קיפאון - אין תזרימים כלל. הריבית נותרת 1.2% לחודש.\nשלב ג' (חודשים 11 עד 15): הפרויקט מניב 18,000 בסוף כל חודש. הריבית בתקופה זו מזנקת ל-2.5% לחודש.\nמהו הערך הנוכחי הכולל של הפרויקט היום (PV)?",
+                cashFlow: [
+                    { time: "1 עד 5", count: "5", flow: "12,000", note: "סדרה 1 (ריבית 1.2%)" },
+                    { time: "6 עד 10", count: "5", flow: "0", note: "תקופת המתנה (ריבית 1.2%)" },
+                    { time: "11 עד 15", count: "5", flow: "18,000", note: "סדרה 2 (ריבית 2.5%)" }
+                ],
+                steps: [
+                    {
+                        type: 'logic',
+                        question: "יש לאפיין תחילה את תזרימי המזומנים ולטפל בסדרה המאוחרת ביותר - שלב ג'. הסדרה האחרונה מתחילה בחודש 11 בתשלום של סוף חודש (Type=0). מהי נקודת הזמן שאליה נגיע כשנחשב ערך נוכחי זה?",
+                        context: "יישם את הכלל שלמדת על תשלומים בסוף תקופה.",
+                        options: [
+                            { id: 'a', text: "נגיע לזמן 11 (הזמן של התשלום עצמו).", wrongFeedback: "שגיאה! כברירת מחדל, נקודת הזמן אליה נגיע מוקדמת בתקופת תשלום אחת ממועד התזרים הראשון." },
+                            { id: 'b', text: "נגיע לזמן 10 (נקודת זמן המוקדמת בתקופת תשלום אחת).", wrongFeedback: "" },
+                            { id: 'c', text: "נגיע לזמן 0, כי הנוסחה יודעת לגלגל הכל יחד.", wrongFeedback: "לא נכון. הנוסחה אינה מבצעת התאמות לאחור מעבר לתקופת הסדרה באופן אוטומטי." }
+                        ],
+                        correctOptionId: 'b',
+                        explanation: "מצוין. הסדרה של שלב ג' תרוכז לנקודת זמן אחת: חודש 10, בדיוק תקופת תשלום אחת לפני התזרים הראשון המופיע בחודש 11."
+                    },
+                    {
+                        type: 'excel',
+                        title: "שלב 1: חישוב הערך הנוכחי של הסדרה המאוחרת (לזמן 10)",
+                        instruction: "חשב את ה-PV של 5 התשלומים משלב ג'. הקפד להזין ריבית ללא סימן אחוז.",
+                        targetField: "pv",
+                        generalHint: "כמה תשלומים יש בסדרה זו שאיברה הראשון מופיע בזמן 11?",
+                        expected: { rate: "2.5", nper: "5", pmt: "18000", pv: "-83624", fv: "0", type: "0" },
+                        successMessage: "התחלה מעולה! מצאת את השווי המדויק של החלק האחרון בפרויקט.",
+                        hints: {
+                            rate: "מה הריבית בחודשים 11-15? (הזן 2.5, ללא %)",
+                            nper: "כמה חודשים נמשך שלב ג'?",
+                            pmt: "התזרים החודשי בשלב זה",
+                            fv: "אין יתרה בסוף, לכן 0",
+                            type: "תשלום סוף חודש (0)"
+                        },
+                        explanation: "מעולה. שוויה של הסדרה האחרונה, נכון לזמן 10, הוא 83,624."
+                    },
+                    {
+                        type: 'excel',
+                        title: "שלב 2: התאמה לאחור דרך תקופת ההמתנה (לזמן 5)",
+                        instruction: "כעת יש לנו סכום של 83,624 בזמן 10. עלינו להעביר אותו אחורה לזמן 5. מכיוון שבחודשים 6-10 אין תזרימים, נבצע היוון של סכום חד-פעמי.",
+                        targetField: "pv",
+                        generalHint: "הערך הנוכחי (PV) שקיבלנו מהשלב הקודם מהווה כעת את הערך העתידי (FV) עבור ההתאמה לאחור. אין כאן תשלומים תקופתיים.",
+                        expected: { rate: "1.2", nper: "5", pmt: "0", pv: "-78767", fv: "83624", type: "0" },
+                        successMessage: "הברקה של אנליסט! צלחת את השלב המבלבל ביותר.",
+                        hints: {
+                            rate: "מהי הריבית שחלה על תקופת ההמתנה? (הזן 1.2)",
+                            nper: "כמה חודשים יש בין זמן 10 לזמן 5?",
+                            pmt: "בשלב זה אין תזרימים, הזן 0",
+                            fv: "התוצאה מהשלב הקודם (הזן בחיוב: 83624)",
+                            type: "לא משנה לסכום חד פעמי, הזן 0"
+                        },
+                        explanation: "יפה מאוד! ביצענו התאמה לסכום מזמן 10 לזמן 5, והוא שווה כעת 78,767."
+                    },
+                    {
+                        type: 'excel',
+                        title: "שלב 3: התאמה סופית לזמן אפס",
+                        instruction: "עכשיו יש לנו שני ערכים בזמן 5: גם סכום עתידי מותאם (FV), וגם סדרת תשלומים שמתחילה מהיום עד חודש 5 (PMT). נציב את שניהם יחד לקבלת PV בזמן 0.",
+                        targetField: "pv",
+                        generalHint: "השילוב המנצח: נכנסים גם ה-PMT של ההתחלה, וגם ה-FV שהבאנו מהשלב הקודם. שניהם עוברים התאמה לאחור (היוון) בבת אחת.",
+                        expected: { rate: "1.2", nper: "5", pmt: "12000", pv: "-132683", fv: "78767", type: "0" },
+                        successMessage: "אלוף עולם! התאמה מושלמת לזמן אפס.",
+                        hints: {
+                            rate: "הריבית של החודשים הראשונים (הזן 1.2)",
+                            nper: "מספר החודשים של שלב א' (5)",
+                            pmt: "התזרים בחודשים 1 עד 5 (12000)",
+                            fv: "הערך העתידי המותאם לזמן 5 (הזן 78767)",
+                            type: "סוף תקופה (0)"
+                        },
+                        explanation: "אדיר! פונקציית האקסל אספה עבורך את הסדרה הראשונה, ובמקביל ביצעה התאמה לאחור לסכום העתידי מזמן 5 להיום. שווי הפרויקט כולו הוא 132,683."
+                    }
+                ]
+            }
+        ];
+
+        // --- Views ---
+        const IntroTutorial = ({ onStart }) => {
+            return (
+                <div className="max-w-4xl mx-auto py-12 px-4 animate-fade-in">
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-brand-100 text-brand-600 mb-6 shadow-inner text-5xl">
+                            🎓
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-heading font-extrabold text-slate-800 mb-4">
+                            ערך נוכחי של סדרות (PV)
+                        </h1>
+                        <p className="text-xl md:text-2xl text-slate-600">מאסטר קלאס אינטראקטיבי: להבין את הלוגיקה והכללים שמאחורי הנוסחאות.</p>
+                    </div>
+
+                    <div className="space-y-8">
+                        <Card delay="100ms">
+                            <h2 className="text-2xl font-bold text-brand-900 mb-4 flex items-center gap-3">
+                                <span className="bg-brand-100 text-brand-600 p-2 rounded-lg text-xl">1</span>
+                                הרציונל: למה בכלל "ערך נוכחי"?
+                            </h2>
+                            <p className="text-lg text-slate-700 leading-relaxed">
+                                בעולם המימון, סכום כסף שיתקבל בעתיד אינו שווה לערכו היום. זאת משום שסכום זמין היום ניתן להשקעה נושאת ריבית. פונקציית ה-PV (Present Value) מבצעת התאמה לאחור ומחשבת את השווי של תזרימים עתידיים במונחי ההווה.
+                            </p>
+                        </Card>
+
+                        <Card delay="200ms" className="bg-gradient-to-br from-brand-600 to-brand-800 text-white border-0">
+                            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                                <span className="bg-white/20 p-2 rounded-lg text-xl">2</span>
+                                חוק הברזל: תחילת תקופה או סוף תקופה?
+                            </h2>
+                            <p className="mb-6 text-brand-50 text-lg leading-relaxed">
+                                אחת מנקודות התורפה המרכזיות היא הבנה שגויה של הגדרת ה-Type. כאשר מחשבים ערך נוכחי של סדרה, יש להבין בדיוק לאיזו נקודת זמן אנו מגיעים. 
+                            </p>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="bg-white/10 p-6 rounded-2xl backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all">
+                                    <div className="text-5xl font-bold text-amber-300 mb-2 font-mono dir-ltr text-center">Type = 0</div>
+                                    <h3 className="font-bold text-xl mb-2 text-white">תשלום בסוף התקופה</h3>
+                                    <p className="text-brand-50 text-base leading-relaxed">
+                                        כברירת מחדל או כאשר מגדירים Type=0, נקודת הזמן אליה מגיעים כשמחשבים ערך נוכחי של סדרה היא נקודת הזמן אשר <strong className="bg-amber-500/80 px-1 rounded text-white underline">מוקדמת בתקופת תשלום אחת</strong> ממועד התזרים הראשון.
+                                    </p>
+                                </div>
+                                <div className="bg-white/10 p-6 rounded-2xl backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all">
+                                    <div className="text-5xl font-bold text-emerald-300 mb-2 font-mono dir-ltr text-center">Type = 1</div>
+                                    <h3 className="font-bold text-xl mb-2 text-white">תשלום בתחילת התקופה</h3>
+                                    <p className="text-brand-50 text-base leading-relaxed">
+                                        אפשר להגדיר את הפונקציה מפורשות ל-Type=1. במקרה שכזה, הערך הנוכחי הסדרתי יוביל <strong className="bg-emerald-500/80 px-1 rounded text-white underline">בדיוק למועד התזרים הראשון</strong> של הסדרה.
+                                    </p>
+                                </div>
+                            </div>
+                        </Card>
+
+                        <Card delay="300ms">
+                            <h2 className="text-2xl font-bold text-brand-900 mb-4 flex items-center gap-3">
+                                <span className="bg-brand-100 text-brand-600 p-2 rounded-lg text-xl">3</span>
+                                תהליך העבודה מול תזרימים מורכבים
+                            </h2>
+                            <p className="text-lg text-slate-700 leading-relaxed mb-4">
+                                כאשר התזרימים נדחים לעתיד, יש לאפיין תחילה את תזרימי המזומנים ולעבוד בשלבים:
+                            </p>
+                            <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center">
+                                <div className="flex-1 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                    <div className="text-3xl mb-2">🏔️</div>
+                                    <div className="font-bold text-brand-700 mb-1">שלב א': שווי הסדרה</div>
+                                    <div className="text-sm text-slate-600">יש לפעול כך שסדרת התזרימים המאוחרת ביותר מטופלת תחילה. מחשבים את הערך הנוכחי שלה בנפרד לנקודת הזמן הרלוונטית.</div>
+                                </div>
+                                <div className="flex items-center justify-center text-2xl text-slate-400 rotate-90 md:rotate-180 font-bold">⬅️</div>
+                                <div className="flex-1 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                    <div className="text-3xl mb-2">🔄</div>
+                                    <div className="font-bold text-brand-700 mb-1">שלב ב': הפיכת PV ל-FV</div>
+                                    <div className="text-sm text-slate-600">הערך הנוכחי (PV) שחישבנו בשלב א', יהווה את הערך העתידי (FV) של השלב העוקב (תוך היפוך הסימן).</div>
+                                </div>
+                                <div className="flex items-center justify-center text-2xl text-slate-400 rotate-90 md:rotate-180 font-bold">⬅️</div>
+                                <div className="flex-1 bg-white p-4 rounded-xl border border-slate-100 shadow-sm border-b-4 border-b-emerald-400">
+                                    <div className="text-3xl mb-2">🎯</div>
+                                    <div className="font-bold text-brand-700 mb-1">שלב ג': התאמה לאחור</div>
+                                    <div className="text-sm text-slate-600">מבצעים התאמה לאחור (היוון) של הסכום העתידי שקיבלנו על פני תקופת ההמתנה, עד לזמן אפס.</div>
+                                </div>
+                            </div>
+                        </Card>
+
+                        <div className="text-center pt-8">
+                            <Button onClick={onStart} className="text-xl px-12 py-5 shadow-2xl hover:-translate-y-1 bg-brand-700 hover:bg-brand-600">
+                                הבנתי את הכללים, בוא נצא לדרך! 🚀
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const FinalSummary = ({ onRestart }) => {
+            return (
+                <div className="max-w-3xl mx-auto py-16 px-4 animate-fade-in">
+                    <Card className="text-center border-t-8 border-t-emerald-500 shadow-2xl bg-gradient-to-b from-white to-emerald-50/30">
+                        <div className="inline-flex items-center justify-center w-28 h-28 rounded-full bg-emerald-100 text-emerald-600 mb-6 shadow-inner text-6xl animate-bounce-soft">
+                            🏆
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-heading font-extrabold text-emerald-900 mb-6">
+                            מאסטר קלאס הושלם!
+                        </h1>
+                        <p className="text-xl text-slate-700 leading-relaxed mb-8 max-w-xl mx-auto">
+                            עבודה יוצאת דופן! התמודדת בהצלחה עם תרחישים פיננסיים מורכבים. 
+                            הוכחת הבנה עמוקה של כללי <strong className="text-emerald-700">Type 0 ו-Type 1</strong>, שליטה מלאה ב<strong className="text-emerald-700">אפיון תזרימים וחישוב מהסוף להתחלה</strong>, ויכולת לבצע התאמות לאחור על פני תקופות עם שינויי ריבית.<br/><br/>
+                            מעכשיו, אתה לא רק מציב מספרים - אתה מבין את הלוגיקה שמאחוריהם.
+                        </p>
+                        <div className="flex justify-center mt-8">
+                            <Button onClick={onRestart} variant="primary" className="text-lg px-10 py-4">
+                                התחל תרגול מחדש 🔄
+                            </Button>
+                        </div>
+                    </Card>
+                </div>
+            );
+        }
+
+        const ExcelInputRow = ({ label, value, onChange, disabled, hint, hasError, isType, isTargetField, isCompleted, targetValue }) => {
+            
+            if (isCompleted && isTargetField) {
+                return (
+                    <div className="flex items-center gap-4 w-full bg-emerald-900/40 p-3 rounded-xl border border-emerald-500/50 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-emerald-500/10 animate-pulse"></div>
+                        <label className="w-16 font-mono text-lg font-bold uppercase text-left text-emerald-300 relative z-10" dir="ltr">
+                            {label}
+                        </label>
+                        <div className="flex-1 h-12 px-4 rounded-lg bg-emerald-950/80 border-2 border-emerald-400 font-mono text-2xl text-emerald-300 font-bold flex items-center justify-center text-center relative z-10 shadow-[0_0_15px_rgba(16,185,129,0.4)]" dir="ltr">
+                            {formatCurrency(targetValue)}
+                        </div>
+                    </div>
+                );
+            }
+            
+            return (
+                <div className={`flex items-center gap-4 w-full p-3 rounded-xl border transition-colors relative group
+                    ${isTargetField && !isCompleted ? 'bg-brand-900/40 border-brand-500/50 shadow-[0_0_15px_rgba(14,165,233,0.15)]' : 'bg-slate-700/40 border-slate-600/50 hover:bg-slate-700'}`}>
+                    
+                    <div className="w-16 relative">
+                        <label className={`block font-mono text-lg font-bold uppercase text-left transition-colors 
+                            ${hasError ? 'text-rose-400' : isTargetField ? 'text-brand-300' : 'text-slate-300'}`} dir="ltr">
+                            {label}
+                        </label>
+                        {isTargetField && !isCompleted && (
+                            <span className="absolute -top-6 -right-6 whitespace-nowrap text-xs bg-brand-500 text-white px-2 py-0.5 rounded shadow text-center animate-pulse">
+                                🎯 יעד לחישוב
+                            </span>
+                        )}
+                    </div>
+                    
+                    <input 
+                        type="number" 
+                        value={value}
+                        onChange={(e) => onChange(label.toLowerCase(), e.target.value)}
+                        disabled={disabled || (isTargetField && isCompleted)}
+                        placeholder={isType ? "0 או 1" : ""}
+                        className={`flex-1 h-12 px-4 rounded-lg bg-slate-800/80 border-2 font-mono text-xl text-white text-center outline-none transition-all
+                            ${hasError ? 'border-rose-500 bg-rose-900/30 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : isTargetField && !isCompleted ? 'border-brand-500 focus:border-brand-300 focus:bg-slate-800/90' : 'border-slate-500 focus:border-excel focus:bg-slate-800'}
+                            ${disabled && !isTargetField ? 'opacity-70 border-emerald-500/50 text-emerald-100' : ''}
+                        `}
+                        dir="ltr"
+                    />
+                    
+                    {hasError && (
+                        <div className="absolute top-1/2 -translate-y-1/2 left-full ml-4 w-64 bg-rose-100 border border-rose-300 text-rose-800 text-sm p-3 rounded-lg shadow-xl z-20 animate-fade-in pointer-events-none before:content-[''] before:absolute before:top-1/2 before:-translate-y-1/2 before:-left-2 before:border-y-8 before:border-y-transparent before:border-r-8 before:border-r-rose-100">
+                            <strong>רמז לשדה {label}:</strong><br/>{hint}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- Main App Logic ---
+        const App = () => {
+            const [view, setView] = useState('intro');
+            const [qIndex, setQIndex] = useState(0);
+            const [stepIndex, setStepIndex] = useState(0);
+            
+            const [selectedLogicId, setSelectedLogicId] = useState(null);
+            const [logicSubmitted, setLogicSubmitted] = useState(false);
+            
+            const [excelInputs, setExcelInputs] = useState({ rate: '', nper: '', pmt: '', pv: '', fv: '', type: '0' });
+            const [excelFeedback, setExcelFeedback] = useState(null);
+            const [excelCompleted, setExcelCompleted] = useState(false);
+            const [isRevealed, setIsRevealed] = useState(false);
+            const [showHintToUser, setShowHintToUser] = useState(false);
+            const excelShakeRef = useRef(null);
+
+            const [showSkipModal, setShowSkipModal] = useState(false);
+
+            const startPractice = () => { setView('practice'); window.scrollTo(0,0); };
+            const restartAll = () => {
+                setQIndex(0); setStepIndex(0);
+                resetStepState();
+                setView('intro');
+                window.scrollTo(0,0);
+            };
+
+            const resetStepState = () => {
+                setSelectedLogicId(null);
+                setLogicSubmitted(false);
+                setExcelInputs({ rate: '', nper: '', pmt: '', pv: '', fv: '', type: '0' });
+                setExcelFeedback(null);
+                setExcelCompleted(false);
+                setIsRevealed(false);
+                setShowHintToUser(false);
+            };
+
+            const goNextStep = () => {
+                const currentQ = DATA[qIndex];
+                if (stepIndex < currentQ.steps.length - 1) {
+                    setStepIndex(stepIndex + 1);
+                } else if (qIndex < DATA.length - 1) {
+                    setQIndex(qIndex + 1);
+                    setStepIndex(0);
+                } else {
+                    fireConfetti('victory');
+                    setView('summary');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                }
+                resetStepState();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const goPrevQuestion = () => {
+                if (qIndex > 0) {
+                    setQIndex(qIndex - 1);
+                    setStepIndex(0);
+                    resetStepState();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+
+            const handleSkipRequest = () => { setShowSkipModal(true); };
+
+            const executeSkip = (showSolutionFirst) => {
+                setShowSkipModal(false);
+                if (showSolutionFirst) {
+                    revealExcelAnswers();
+                } else {
+                    if (qIndex < DATA.length - 1) {
+                        setQIndex(qIndex + 1);
+                        setStepIndex(0);
+                        resetStepState();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } else {
+                        setView('summary');
+                        fireConfetti('victory');
+                    }
+                }
+            };
+
+            const handleLogicCheck = (correctId) => {
+                if(selectedLogicId === null) return;
+                setLogicSubmitted(true);
+                if(selectedLogicId === correctId) fireConfetti('logic');
+            };
+
+            const handleExcelInputChange = (field, value) => {
+                setExcelInputs(prev => ({ ...prev, [field]: value }));
+                setExcelFeedback(null);
+            };
+
+            const handleExcelCheck = (expected, hints, visibleFields, targetField, successMsg) => {
+                let errorField = null;
+                for (const key of visibleFields) {
+                    if (key === targetField) continue;
+                    
+                    const userVal = parseFloat(excelInputs[key] || 0);
+                    const expVal = parseFloat(expected[key] || 0);
+
+                    if (userVal !== expVal) { errorField = key; break; }
+                }
+
+                if (!errorField) {
+                    fireConfetti('success');
+                    setExcelInputs(prev => ({...prev, [targetField]: expected[targetField]}));
+                    setExcelFeedback({ type: 'success', msg: successMsg || 'תשובה מדויקת! הפונקציה חישבה את הערך בהצלחה.' });
+                    setExcelCompleted(true);
+                    setShowHintToUser(false);
+                } else {
+                    if(excelShakeRef.current) {
+                        excelShakeRef.current.classList.remove('animate-shake');
+                        void excelShakeRef.current.offsetWidth;
+                        excelShakeRef.current.classList.add('animate-shake');
+                    }
+                    setExcelFeedback({ 
+                        type: 'error', 
+                        field: errorField,
+                        msg: `נראה שיש טעות בערך של ${errorField.toUpperCase()}. ראה רמז לצידו.` 
+                    });
+                }
+            };
+
+            const revealExcelAnswers = () => {
+                const step = DATA[qIndex].steps[stepIndex];
+                if (step.type !== 'excel') return;
+                
+                const expected = step.expected;
+                setExcelInputs({
+                    rate: expected.rate !== "" ? expected.rate : "",
+                    nper: expected.nper !== "" ? expected.nper : "",
+                    pmt: expected.pmt !== "" ? expected.pmt : "",
+                    pv: expected.pv !== "" ? expected.pv : "",
+                    fv: expected.fv !== "" ? expected.fv : "",
+                    type: expected.type !== "" ? expected.type : "0",
+                });
+                
+                setIsRevealed(true);
+                setExcelCompleted(true);
+                setShowHintToUser(false);
+                setExcelFeedback({ 
+                    type: 'success', 
+                    msg: 'זה בסדר גמור! מימון זה קורס מאתגר ולפעמים צריך לראות את הפתרון כדי ללמוד. הנה הנתונים המלאים - קח רגע להבין את הלוגיקה שלהם.' 
+                });
+            };
+
+            if (view === 'intro') return <IntroTutorial onStart={startPractice} />;
+            if (view === 'summary') return <FinalSummary onRestart={restartAll} />;
+
+            const currentQ = DATA[qIndex];
+            const currentStep = currentQ.steps[stepIndex];
+            
+            let totalSteps = 0; let completedSteps = 0;
+            DATA.forEach((q, i) => {
+                totalSteps += q.steps.length;
+                if (i < qIndex) {
+                    completedSteps += q.steps.length;
+                } else if (i === qIndex) {
+                    completedSteps += stepIndex;
+                    if ((currentStep.type === 'excel' && excelCompleted) || 
+                        (currentStep.type === 'logic' && logicSubmitted && selectedLogicId === currentStep.correctOptionId)) {
+                        completedSteps += 1;
+                    }
+                }
+            });
+            const progressPct = Math.min((completedSteps / totalSteps) * 100, 100);
+
+            return (
+                <div className="min-h-screen pb-24 relative">
+                    <div className="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm mb-8">
+                        <div className="max-w-6xl mx-auto px-4 py-3">
+                            <div className="flex justify-between items-center mb-2">
+                                <div className="flex items-center gap-4">
+                                    <span className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                                        <span className="text-brand-600 bg-brand-100 w-8 h-8 rounded-full flex items-center justify-center">🎓</span>
+                                        תרגיל {qIndex + 1} מתוך {DATA.length}
+                                    </span>
+                                    {qIndex > 0 && (
+                                        <button onClick={goPrevQuestion} className="text-sm text-slate-500 hover:text-brand-600 transition-colors font-semibold flex items-center gap-1">
+                                            <span>⬅️</span> חזור לשאלה קודמת
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <button onClick={handleSkipRequest} className="text-sm text-amber-600 hover:text-amber-700 hover:bg-amber-50 px-3 py-1 rounded-lg transition-colors font-semibold">
+                                        דלג על השאלה ⏭️
+                                    </button>
+                                    <span className="font-bold text-brand-600 bg-brand-50 px-3 py-1 rounded-full text-sm border border-brand-200">
+                                        {Math.round(progressPct)}%
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                <div className="bg-brand-500 h-full transition-all duration-700 ease-out" style={{ width: `${progressPct}%` }}></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-6xl mx-auto px-4">
+                        <div className="grid lg:grid-cols-12 gap-8">
+                            
+                            <div className="lg:col-span-5 space-y-6">
+                                <Card className="border-t-4 border-t-brand-500 sticky top-24">
+                                    <div className="flex items-center gap-2 mb-5">
+                                        <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-md text-xs font-bold tracking-widest uppercase border border-slate-200">תיאור מקרה</span>
+                                        <span className={`px-3 py-1 rounded-md text-xs font-bold border ${currentQ.difficulty === 'בינונית' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
+                                            רמה: {currentQ.difficulty}
+                                        </span>
+                                    </div>
+                                    <h2 className="text-3xl font-heading font-extrabold text-slate-800 mb-4">{currentQ.title}</h2>
+                                    <p className="text-slate-700 text-lg leading-relaxed whitespace-pre-line mb-6">
+                                        {currentQ.story}
+                                    </p>
+                                    <CashFlowTable data={currentQ.cashFlow} />
+                                    
+                                    <div className="mt-6 bg-brand-50 p-4 rounded-xl border border-brand-100 text-sm">
+                                        <h4 className="font-bold text-brand-800 mb-2 flex items-center gap-2"><span>🧭</span> הרציונל לפיתרון:</h4>
+                                        <p className="text-brand-900 leading-relaxed">{currentQ.rationale}</p>
+                                    </div>
+                                </Card>
+                            </div>
+
+                            <div className="lg:col-span-7 relative">
+                                <div className="flex items-center gap-2 mb-6 bg-white p-2 rounded-2xl shadow-sm border border-slate-200">
+                                    {currentQ.steps.map((s, idx) => (
+                                        <div key={idx} className={`h-10 flex-1 rounded-xl transition-colors duration-500 flex items-center justify-center font-bold text-sm
+                                            ${idx < stepIndex ? 'bg-emerald-100 text-emerald-700' : idx === stepIndex ? 'bg-brand-500 text-white shadow-md' : 'bg-slate-100 text-slate-400'}`}>
+                                            {idx < stepIndex ? '✔️ בוצע' : `שלב ${idx + 1}`}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {currentStep.type === 'logic' && (
+                                    <div className="animate-slide-up">
+                                        <div className="bg-white border-2 border-brand-100 p-8 rounded-3xl shadow-lg mb-6 relative overflow-hidden">
+                                            <div className="absolute -left-4 -top-4 opacity-[0.03] text-9xl">💡</div>
+                                            <h3 className="text-2xl font-heading font-bold text-brand-900 mb-4 relative z-10 flex items-center gap-3">
+                                                <span className="text-brand-500 bg-brand-50 p-2 rounded-xl text-2xl">❓</span> 
+                                                {currentStep.question}
+                                            </h3>
+                                            <p className="text-slate-600 text-lg mb-8 relative z-10 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                                {currentStep.context}
+                                            </p>
+                                            
+                                            <div className="space-y-4 relative z-10">
+                                                {currentStep.options.map(opt => {
+                                                    const isSelected = selectedLogicId === opt.id;
+                                                    const isCorrectOpt = opt.id === currentStep.correctOptionId;
+                                                    
+                                                    let btnClass = "w-full text-right p-5 rounded-2xl border-2 transition-all flex items-center justify-between shadow-sm ";
+                                                    if (!logicSubmitted) {
+                                                        btnClass += isSelected ? "border-brand-500 bg-brand-50 ring-2 ring-brand-200" : "border-slate-200 bg-white hover:border-brand-300 hover:bg-slate-50";
+                                                    } else {
+                                                        if (isCorrectOpt) btnClass += "border-emerald-500 bg-emerald-50 text-emerald-900 shadow-md";
+                                                        else if (isSelected && !isCorrectOpt) btnClass += "border-rose-400 bg-rose-50 text-rose-900";
+                                                        else btnClass += "border-slate-100 bg-slate-50/50 opacity-50";
+                                                    }
+
+                                                    return (
+                                                        <button key={opt.id} onClick={() => !logicSubmitted && setSelectedLogicId(opt.id)} disabled={logicSubmitted} className={btnClass}>
+                                                            <span className="font-medium text-lg leading-relaxed">{opt.text}</span>
+                                                            {logicSubmitted && isCorrectOpt && <span className="text-emerald-500 text-2xl">✅</span>}
+                                                            {logicSubmitted && isSelected && !isCorrectOpt && <span className="text-rose-500 text-2xl">❌</span>}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {!logicSubmitted ? (
+                                            <div className="flex justify-end mt-6">
+                                                <Button onClick={() => handleLogicCheck(currentStep.correctOptionId)} disabled={selectedLogicId === null} variant="primary" className="text-lg px-8">
+                                                    בדוק את ההיגיון שלי ⬅️
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className={`p-6 mt-6 rounded-2xl shadow-md border animate-fade-in ${selectedLogicId === currentStep.correctOptionId ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}>
+                                                <h4 className={`font-bold text-xl mb-3 flex items-center gap-2 ${selectedLogicId === currentStep.correctOptionId ? 'text-emerald-800' : 'text-rose-800'}`}>
+                                                    {selectedLogicId === currentStep.correctOptionId ? '✅ פדגוגיה מדויקת!' : '⚠️ כמעט... בוא נחשוב שוב'}
+                                                </h4>
+                                                <p className="text-slate-700 leading-relaxed text-lg mb-6">
+                                                    {selectedLogicId === currentStep.correctOptionId ? currentStep.explanation : currentStep.options.find(o => o.id === selectedLogicId).wrongFeedback}
+                                                </p>
+                                                <div className="flex justify-end gap-3">
+                                                    {selectedLogicId === currentStep.correctOptionId ? (
+                                                        <Button onClick={goNextStep} variant="success" className="text-lg px-8">
+                                                            המשך לביצוע באקסל 🧮
+                                                        </Button>
+                                                    ) : (
+                                                        <Button onClick={() => {setLogicSubmitted(false); setSelectedLogicId(null);}} variant="outline">
+                                                            נסה שוב 🔄
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {currentStep.type === 'excel' && (() => {
+                                    const visibleFields = ['rate', 'nper', 'pmt', 'pv', 'fv', 'type'];
+                                    const targetField = currentStep.targetField;
+                                    
+                                    return (
+                                        <div className="animate-slide-up bg-white p-2 sm:p-4 rounded-3xl shadow-xl border border-slate-100">
+                                            <div className="mb-6 px-4 pt-4">
+                                                <h3 className="text-2xl font-heading font-bold text-slate-800 flex items-center gap-3 mb-3">
+                                                    <span className="bg-excel-light text-excel p-2 rounded-xl text-2xl">📊</span> 
+                                                    {currentStep.title}
+                                                </h3>
+                                                <p className="text-slate-600 text-lg leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                                    {currentStep.instruction}
+                                                </p>
+                                            </div>
+
+                                            <div ref={excelShakeRef} className="bg-slate-800 p-6 sm:p-8 rounded-3xl shadow-2xl relative border-t-[10px] border-excel mx-2 mb-6">
+                                                <div className="absolute top-4 left-4 flex gap-1.5">
+                                                    <div className="w-3.5 h-3.5 rounded-full bg-rose-500 shadow-sm"></div>
+                                                    <div className="w-3.5 h-3.5 rounded-full bg-amber-500 shadow-sm"></div>
+                                                    <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-sm"></div>
+                                                </div>
+                                                
+                                                <div className="text-center mt-2 mb-4">
+                                                    <span className="inline-block bg-rose-100 text-rose-800 px-4 py-2 rounded-lg font-bold text-sm border border-rose-200 shadow-sm">
+                                                        🚨 שים לב: בסימולטור זה, כמו במבחן, יש להזין את הריבית (Rate) תמיד ללא סימן %
+                                                    </span>
+                                                </div>
+                                                
+                                                <div className="text-center mb-8 mt-2">
+                                                    <div dir="ltr" className="inline-flex items-center gap-2 bg-slate-900/50 px-6 py-2 rounded-full border border-slate-700 shadow-inner">
+                                                        <span className="text-2xl text-emerald-400 font-bold italic font-serif">fx</span> 
+                                                        <span className="text-xl text-slate-300">=</span>
+                                                        <span className="text-xl font-bold text-white tracking-widest">{currentStep.isPmtCalculation ? 'PMT' : 'PV'}</span>
+                                                        <span className="text-xl text-slate-400">(...)</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex flex-col gap-3 max-w-sm mx-auto relative">
+                                                    {visibleFields.map(field => {
+                                                        const isTarget = field === targetField;
+                                                        const hasError = excelFeedback?.type === 'error' && excelFeedback.field === field;
+                                                        
+                                                        return (
+                                                            <ExcelInputRow 
+                                                                key={field}
+                                                                label={field}
+                                                                value={excelInputs[field]}
+                                                                onChange={handleExcelInputChange}
+                                                                disabled={excelCompleted && !isTarget} 
+                                                                hasError={hasError}
+                                                                hint={currentStep.hints[field]}
+                                                                isType={field === 'type'}
+                                                                isTargetField={isTarget}
+                                                                isCompleted={excelCompleted}
+                                                                targetValue={currentStep.expected[field]}
+                                                            />
+                                                        );
+                                                    })}
+                                                </div>
+                                                
+                                                {showHintToUser && !excelCompleted && (
+                                                    <div className="max-w-sm mx-auto mt-6 bg-slate-700 border border-brand-400/50 rounded-xl p-4 animate-fade-in text-brand-100 text-sm shadow-lg text-center">
+                                                        <strong>💡 רמז של אלופים:</strong><br/>
+                                                        {currentStep.generalHint}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {excelFeedback && (
+                                                <div className={`mx-2 p-5 rounded-2xl mb-6 shadow-sm border animate-fade-in flex items-start gap-4 ${excelFeedback.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'}`}>
+                                                    <div className="text-3xl">
+                                                        {excelFeedback.type === 'success' ? '✅' : '💡'}
+                                                    </div>
+                                                    <div className="text-lg leading-relaxed pt-1 font-medium">
+                                                        {excelFeedback.msg}
+                                                        {isRevealed && (
+                                                            <p className="mt-3 text-emerald-700 bg-emerald-100/50 p-3 rounded-lg">
+                                                                {currentStep.explanation}
+                                                            </p>
+                                                        )}
+                                                        {!isRevealed && excelFeedback.type === 'success' && (
+                                                            <p className="mt-2 text-emerald-700 font-normal">{currentStep.explanation}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-2 mt-8 flex-wrap">
+                                                <div className="flex w-full sm:w-auto gap-3 order-2 sm:order-1">
+                                                    {!excelCompleted && (
+                                                        <Button onClick={() => revealExcelAnswers()} variant="danger" className="flex-1 sm:flex-none text-sm">
+                                                            התייאשתי, גלה לי 🏳️
+                                                        </Button>
+                                                    )}
+                                                    {!excelCompleted && !showHintToUser && (
+                                                        <Button onClick={() => setShowHintToUser(true)} variant="warning" className="flex-1 sm:flex-none text-sm">
+                                                            תרמוז לי 🤫
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                                
+                                                {!excelCompleted ? (
+                                                    <Button onClick={() => handleExcelCheck(currentStep.expected, currentStep.hints, visibleFields, targetField, currentStep.successMessage)} variant="excel" className="text-lg px-10 py-4 w-full sm:w-auto order-1 sm:order-2 shadow-xl">
+                                                        בצע חישוב 🧮
+                                                    </Button>
+                                                ) : (
+                                                    <Button onClick={goNextStep} variant="success" className="text-lg px-10 py-4 w-full sm:w-auto animate-pulse-glow order-1 sm:order-2 shadow-xl">
+                                                        {stepIndex === currentQ.steps.length - 1 ? 'לשאלה הבאה 🚀' : 'המשך לשלב הבא ⬅️'}
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        </div>
+                    </div>
+
+                    {showSkipModal && (
+                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
+                            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-slide-up border border-slate-200">
+                                <h3 className="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-3">
+                                    <span className="text-3xl">🤔</span> רגע לפני שמדלגים...
+                                </h3>
+                                <p className="text-slate-600 text-lg mb-8 leading-relaxed">
+                                    האם תרצה לראות את הפתרון של השלב הנוכחי כדי ללמוד ממנו, או שפשוט נקפוץ ישר לשאלה הבאה?
+                                </p>
+                                <div className="flex flex-col gap-3">
+                                    <Button onClick={() => executeSkip(true)} variant="outline" className="w-full text-lg border-brand-300 text-brand-700 bg-brand-50 hover:bg-brand-100 shadow-sm">
+                                        הראה לי את הפתרון לשלב זה 📖
+                                    </Button>
+                                    <Button onClick={() => executeSkip(false)} variant="primary" className="w-full text-lg shadow-md">
+                                        דלג ישר לשאלה הבאה ⏭️
+                                    </Button>
+                                    <button onClick={() => setShowSkipModal(false)} className="mt-4 text-slate-400 hover:text-slate-600 font-semibold transition-colors">
+                                        ביטול, אני אמשיך לנסות
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ErrorBoundary><App /></ErrorBoundary>);
+    </script>
+</body>
+</html>
