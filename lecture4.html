@@ -233,6 +233,14 @@
                         targetField: "pv",
                         generalHint: "כמה תשלומים קיימים בסדרה שאיברה הראשון מופיע בזמן 7?",
                         expected: { rate: "6", nper: "35", pmt: "250000", pv: "-3624558", fv: "0", type: "0" },
+                        fieldExplanations: {
+                            rate: "הריבית השנתית נתונה כ-6%.",
+                            nper: "הסדרה כוללת 35 תשלומי משכורת (שנות עבודה).",
+                            pmt: "סכום המשכורת השנתית הקבועה הוא 250,000.",
+                            fv: "לא נותר סכום חד-פעמי בסוף תקופת העבודה, לכן 0.",
+                            type: "המשכורת משולמת בסוף כל שנה, לכן מזינים 0.",
+                            pv: "זוהי התוצאה המחושבת: הערך הנוכחי של סדרת המשכורות בנקודת הזמן 6."
+                        },
                         successMessage: "יצאת תותח! שווי כל המשכורות בנקודת הזמן 6 חושב היטב.",
                         hints: {
                             rate: "הריבית השנתית (הזן 6, ללא סימן %)",
@@ -250,6 +258,14 @@
                         targetField: "pv",
                         generalHint: "הערך הנוכחי (PV) שקיבלנו בצעד הקודם, יהווה את הערך העתידי (FV) של השלב העוקב (בהיפוך סימן).",
                         expected: { rate: "6", nper: "6", pmt: "0", pv: "-2555183", fv: "3624558", type: "0" },
+                        fieldExplanations: {
+                            rate: "הריבית השנתית נותרה 6%.",
+                            nper: "תקופת ההתאמה לאחור (היוון) היא מזמן 6 לזמן 0, כלומר 6 שנים.",
+                            pmt: "אין תשלומים תקופתיים בשלב זה (קיפאון), ולכן 0.",
+                            fv: "הערך שהתקבל בשלב הקודם (3,624,558) מוצב כעת כערך עתידי להיוון.",
+                            type: "עבור סכום חד-פעמי ה-Type אינו משפיע, לכן מזינים 0.",
+                            pv: "זוהי התוצאה המחושבת: הערך המותאם של הסכום במונחי זמן אפס (היום)."
+                        },
                         successMessage: "תשובה פנטסטית! ביצעת התאמה מדויקת של הסכום להיום.",
                         hints: {
                             rate: "אותה ריבית (הזן 6, ללא סימן %)",
@@ -291,6 +307,14 @@
                         targetField: "pv",
                         generalHint: "כמה תשלומים קיימים בסדרה מגיל 65 עד 85? זכור להזין את הריבית ללא סימן %.",
                         expected: { rate: "0.4", nper: "240", pmt: "12000", pv: "-1855103", fv: "0", type: "1" },
+                        fieldExplanations: {
+                            rate: "הריבית החודשית נתונה כ-0.4%.",
+                            nper: "תקופת הפנסיה היא 20 שנים, שהם 240 חודשים.",
+                            pmt: "הקצבה החודשית המבוקשת היא 12,000.",
+                            fv: "המטרה היא לרוקן את הקופה לחלוטין עד תום הפנסיה, לכן 0.",
+                            type: "המשיכה מתבצעת בתחילת כל חודש, לכן מזינים 1.",
+                            pv: "זוהי התוצאה המחושבת: גודל הקופה הנדרש בדיוק ביום הפרישה (גיל 65)."
+                        },
                         successMessage: "הפצצת! הקופה הדרושה מחושבת בצורה חלקה ומדויקת.",
                         hints: {
                             rate: "הריבית החודשית (הזן 0.4 ללא %)",
@@ -309,6 +333,14 @@
                         instruction: "ידוע שדן צריך להגיע ל-1,855,103 בגיל 65. נשתמש בזה כערך עתידי (FV). חלץ את סכום ההפקדה החודשית (PMT) הנדרש במשך 35 השנים שנותרו לו.",
                         generalHint: "הערך הנוכחי (PV) שחישבנו קודם הופך לערך העתידי (FV) של השלב העוקב (בהיפוך סימן), כדי שנוכל לחלץ ממנו את סדרת ההפקדות.",
                         expected: { rate: "0.4", nper: "420", pmt: "-1708", pv: "0", fv: "1855103", type: "0" },
+                        fieldExplanations: {
+                            rate: "הריבית החודשית בשלב החיסכון היא 0.4%.",
+                            nper: "תקופת החיסכון היא מגיל 30 עד 65, כלומר 35 שנים שהם 420 חודשים.",
+                            pv: "דן מתחיל היום מ-0 בחשבון החיסכון.",
+                            fv: "יעד הצבירה הדרוש לגיל 65 כפי שחושב בשלב הקודם (1,855,103).",
+                            type: "ההפקדות מתבצעות בסוף כל חודש, לכן 0.",
+                            pmt: "זוהי התוצאה המחושבת: סכום ההפקדה החודשית שדן נדרש להפריש."
+                        },
                         successMessage: "ביצוע מרשים! מצאת את ההפקדה החודשית הנדרשת.",
                         hints: {
                             rate: "אותה ריבית (הזן 0.4 ללא %)",
@@ -352,6 +384,14 @@
                         targetField: "pv",
                         generalHint: "כמה תשלומים יש בסדרה זו שאיברה הראשון מופיע בזמן 11?",
                         expected: { rate: "2.5", nper: "5", pmt: "18000", pv: "-83624", fv: "0", type: "0" },
+                        fieldExplanations: {
+                            rate: "הריבית הרלוונטית לחודשים 11-15 היא 2.5%.",
+                            nper: "הסדרה המאוחרת (שלב ג') נמשכת 5 חודשים.",
+                            pmt: "התזרים החודשי בשלב זה הוא 18,000.",
+                            fv: "אין יתרה או סכום חד-פעמי בסוף השלב, לכן 0.",
+                            type: "התשלום מבוצע בסוף חודש, לכן 0.",
+                            pv: "זוהי התוצאה המחושבת: שווי הסדרה המאוחרת, נכון לזמן 10."
+                        },
                         successMessage: "התחלה מעולה! מצאת את השווי המדויק של החלק האחרון בפרויקט.",
                         hints: {
                             rate: "מה הריבית בחודשים 11-15? (הזן 2.5, ללא %)",
@@ -369,6 +409,14 @@
                         targetField: "pv",
                         generalHint: "הערך הנוכחי (PV) שקיבלנו מהשלב הקודם מהווה כעת את הערך העתידי (FV) עבור ההתאמה לאחור. אין כאן תשלומים תקופתיים.",
                         expected: { rate: "1.2", nper: "5", pmt: "0", pv: "-78767", fv: "83624", type: "0" },
+                        fieldExplanations: {
+                            rate: "הריבית הרלוונטית לתקופת ההמתנה (חודשים 6-10) היא 1.2%.",
+                            nper: "תקופת ההתאמה לאחור היא מזמן 10 לזמן 5, כלומר 5 חודשים.",
+                            pmt: "בתקופה זו אין תזרימים (קיפאון), לכן 0.",
+                            fv: "הערך הנוכחי מזמן 10 שחושב קודם (83,624) מוצב כערך עתידי.",
+                            type: "עבור סכום חד-פעמי ה-Type אינו משפיע, לכן 0.",
+                            pv: "זוהי התוצאה המחושבת: הערך המותאם של הסכום העתידי, נכון לזמן 5."
+                        },
                         successMessage: "הברקה של אנליסט! צלחת את השלב המבלבל ביותר.",
                         hints: {
                             rate: "מהי הריבית שחלה על תקופת ההמתנה? (הזן 1.2)",
@@ -386,6 +434,14 @@
                         targetField: "pv",
                         generalHint: "השילוב המנצח: נכנסים גם ה-PMT של ההתחלה, וגם ה-FV שהבאנו מהשלב הקודם. שניהם עוברים התאמה לאחור (היוון) בבת אחת.",
                         expected: { rate: "1.2", nper: "5", pmt: "12000", pv: "-132683", fv: "78767", type: "0" },
+                        fieldExplanations: {
+                            rate: "הריבית הרלוונטית לחודשים 1-5 היא 1.2%.",
+                            nper: "תקופת הסדרה הראשונה (שלב א') היא 5 חודשים.",
+                            pmt: "התזרים החודשי בשלב זה הוא 12,000.",
+                            fv: "הסכום העתידי המותאם מזמן 5 (78,767) מוצב כאן כדי להתגלגל יחד עם הסדרה.",
+                            type: "התשלום מבוצע בסוף חודש, לכן 0.",
+                            pv: "זוהי התוצאה הסופית המחושבת: הערך הנוכחי של כל הפרויקט במונחי זמן אפס."
+                        },
                         successMessage: "אלוף עולם! התאמה מושלמת לזמן אפס.",
                         hints: {
                             rate: "הריבית של החודשים הראשונים (הזן 1.2)",
@@ -711,7 +767,7 @@
                 setShowHintToUser(false);
                 setExcelFeedback({ 
                     type: 'success', 
-                    msg: 'זה בסדר גמור! מימון זה קורס מאתגר ולפעמים צריך לראות את הפתרון כדי ללמוד. הנה הנתונים המלאים - קח רגע להבין את הלוגיקה שלהם.' 
+                    msg: 'הנה הפתרון המלא. חשוב מאוד לעבור על ההסבר של כל שדה כדי להבין את הלוגיקה והכללים:' 
                 });
             };
 
@@ -735,6 +791,8 @@
                 }
             });
             const progressPct = Math.min((completedSteps / totalSteps) * 100, 100);
+
+            const visibleFields = ['rate', 'nper', 'pmt', 'pv', 'fv', 'type'];
 
             return (
                 <div className="min-h-screen pb-24 relative">
@@ -869,7 +927,6 @@
                                 )}
 
                                 {currentStep.type === 'excel' && (() => {
-                                    const visibleFields = ['rate', 'nper', 'pmt', 'pv', 'fv', 'type'];
                                     const targetField = currentStep.targetField;
                                     
                                     return (
@@ -938,21 +995,43 @@
                                             </div>
 
                                             {excelFeedback && (
-                                                <div className={`mx-2 p-5 rounded-2xl mb-6 shadow-sm border animate-fade-in flex items-start gap-4 ${excelFeedback.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'}`}>
-                                                    <div className="text-3xl">
-                                                        {excelFeedback.type === 'success' ? '✅' : '💡'}
+                                                <div className={`mx-2 p-5 rounded-2xl mb-6 shadow-sm border animate-fade-in flex flex-col gap-4 ${excelFeedback.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'}`}>
+                                                    <div className="flex items-start gap-4">
+                                                        <div className="text-3xl">
+                                                            {excelFeedback.type === 'success' ? '✅' : '💡'}
+                                                        </div>
+                                                        <div className="text-lg leading-relaxed pt-1 font-medium">
+                                                            {excelFeedback.msg}
+                                                            {!isRevealed && excelFeedback.type === 'success' && (
+                                                                <p className="mt-2 text-emerald-700 font-normal">{currentStep.explanation}</p>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                    <div className="text-lg leading-relaxed pt-1 font-medium">
-                                                        {excelFeedback.msg}
-                                                        {isRevealed && (
-                                                            <p className="mt-3 text-emerald-700 bg-emerald-100/50 p-3 rounded-lg">
+                                                    
+                                                    {/* Expanded logic explanation on Reveal */}
+                                                    {isRevealed && currentStep.fieldExplanations && (
+                                                        <div className="mt-2 bg-white/60 p-5 rounded-xl border border-emerald-200/50 shadow-inner">
+                                                            <h5 className="font-bold text-emerald-900 mb-4 flex items-center gap-2">
+                                                                <span className="text-xl">🔍</span> פירוט הרציונל לכל שדה:
+                                                            </h5>
+                                                            <ul className="space-y-3">
+                                                                {visibleFields.map(field => (
+                                                                    <li key={field} className="flex items-start gap-3 text-emerald-900">
+                                                                        <span className="font-mono font-bold uppercase bg-emerald-200/70 text-emerald-800 px-2 py-1 rounded text-sm w-14 text-center shrink-0 border border-emerald-300/50">
+                                                                            {field}
+                                                                        </span>
+                                                                        <span className="leading-relaxed">
+                                                                            {currentStep.fieldExplanations[field]}
+                                                                        </span>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                            <div className="mt-5 text-emerald-800 font-bold border-t border-emerald-200/60 pt-4">
+                                                                <span className="text-emerald-600 block text-sm mb-1">סיכום השלב:</span>
                                                                 {currentStep.explanation}
-                                                            </p>
-                                                        )}
-                                                        {!isRevealed && excelFeedback.type === 'success' && (
-                                                            <p className="mt-2 text-emerald-700 font-normal">{currentStep.explanation}</p>
-                                                        )}
-                                                    </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
 
