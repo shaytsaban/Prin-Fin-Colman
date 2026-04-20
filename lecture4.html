@@ -213,7 +213,7 @@
                     { id: 'd', text: "זמן 1, מכיוון שזו סדרה חודשית." }
                 ],
                 correctId: 'b',
-                explanation: "נכון מאוד! כאשר מגדירים Type=0 (או משאירים כברירת מחדל), פונקציית ה-PV מובילה תמיד לנקודת זמן המוקדמת בתקופת תשלום אחת מהתזרים הראשון. לכן, אם התזרים הראשון בזמן 4, הערך הנוכחי יחושב לזמן 3."
+                explanation: "שלב א': מבינים ש-Type=0 משמעותו תשלום בסוף תקופה.\nשלב ב': מיישמים את חוק הברזל - פונקציית ה-PV מובילה תמיד לנקודת זמן המוקדמת בתקופת תשלום אחת מהתזרים הראשון.\nשלב ג': מחשבים - מאחר והתזרים הראשון הוא בזמן 4, הערך הנוכחי יחושב בדיוק לזמן 3."
             },
             {
                 id: 2,
@@ -222,22 +222,22 @@
                     { id: 'a', text: "Type=0 מיועד לריבית שנתית, ו-Type=1 לריבית חודשית." },
                     { id: 'b', text: "Type=0 מחייב שימוש ב-PMT חיובי, ואילו Type=1 מחייב PMT שלילי." },
                     { id: 'c', text: "ב-Type=0 נקודת הזמן אליה נגיע מוקדמת בתקופה אחת ממועד התזרים הראשון, ואילו ב-Type=1 הערך הנוכחי יוביל בדיוק למועד התזרים הראשון של הסדרה." },
-                    { id: 'd', text: "אין הבדל ממשי, מדובר רק במוסכמת סימונים שונה בגרסאות אקסל חדשות." }
+                    { id: 'd', text: "אין הבדל ממשי, מדובר רק במוסכמת סימונים שונה." }
                 ],
                 correctId: 'c',
-                explanation: "מדויק. הכלל קובע שבתשלומי סוף תקופה (Type=0) יש 'קפיצה' של תקופה אחת אחורה, בעוד שבתשלומי תחילת תקופה (Type=1) הערך הנוכחי ממוקם בדיוק על התזרים הראשון."
+                explanation: "שלב א': ניתוח Type=0. הגדרה זו מניחה תשלום בסוף תקופה ולכן קופצת תקופה אחת אחורה מהתזרים הראשון.\nשלב ב': ניתוח Type=1. הגדרה זו מניחה תשלום בתחילת התקופה, ולכן אין 'קפיצה' אחורה - הערך הנוכחי מחושב בדיוק לאותו מועד בו מתבצע התזרים הראשון."
             },
             {
                 id: 3,
-                question: "נתונה סדרה של 8 תשלומים שנתיים, כל אחד על סך 5,000 ש\"ח. הריבית השנתית היא 4%. מהי הדרך הנכונה להזין את פרמטרי ה-NPER וה-RATE באקסל בהתאם לגישת הקורס?",
+                question: "באקסל האמיתי (לא בסימולטור שלנו), נתונה סדרה של 8 תשלומים שנתיים, כל אחד על סך 5,000 ש\"ח. הריבית השנתית היא 4%. מהי הדרך הנכונה להזין את פרמטרי ה-NPER וה-RATE בפונקציה?",
                 options: [
-                    { id: 'a', text: "הואיל ופרק הזמן בין תשלומים הוא שנה, יש להזין NPER=8 ו-RATE=4 (ללא סימן אחוז)." },
-                    { id: 'b', text: "יש להזין NPER=8 ו-RATE=0.04." },
-                    { id: 'c', text: "יש להזין NPER=96 (חודשים) ו-RATE=4." },
-                    { id: 'd', text: "יש להזין NPER=8 ו-RATE=4%." }
+                    { id: 'a', text: "יש להזין NPER=8 ו-RATE=4 (ללא סימן %, כפי שעשינו בסימולטור)." },
+                    { id: 'b', text: "יש להזין NPER=8 ו-RATE=4% (או כעשרוני 0.04)." },
+                    { id: 'c', text: "יש להזין NPER=96 (חודשים) ו-RATE=4%." },
+                    { id: 'd', text: "יש להזין NPER=8 ו-RATE=0.4." }
                 ],
-                correctId: 'a',
-                explanation: "בדיוק! בקורס ובמבחן, הואיל ופרק הזמן בין תשלומים הוא שנה, מספר התזרימים הנתונים הוא 8, ויש להזין את הריבית השנתית הנתונה כאן כמספר שלם ללא סימן האחוז (4)."
+                correctId: 'b',
+                explanation: "שלב א': מזהים את תדירות התשלומים - שנתית, לכן NPER=8.\nשלב ב': מתאימים את הריבית לתדירות באקסל האמיתי. בעוד שבסימולטור השתמשנו במספרים שלמים לנוחות, באקסל האמיתי חובה להזין את הריבית עם סימן האחוז (4%) או כשבר עשרוני (0.04), אחרת התוכנה תתייחס למספר '4' כאל 400% ריבית!"
             },
             {
                 id: 4,
@@ -249,7 +249,7 @@
                     { id: 'd', text: "נכפיל את ה-PV בשיעור הריבית השנתית." }
                 ],
                 correctId: 'b',
-                explanation: "תשובה נכונה. תכסיס 'הגלגול לאחור' אומר שהערך שחושב הופך כעת לערך עתידי (FV), ובהיעדר תזרימים נוספים (PMT=0), אנו פשוט מהוונים אותו לסכום חד פעמי בזמן אפס."
+                explanation: "שלב א': אפיון. הערך הנוכחי (PV) שחילצנו מייצג את שווי הסדרה המאוחרת בנקודת ההתחלה שלה בעתיד.\nשלב ב': שינוי כובע. מכיוון שכעת אנו רוצים לגלגל את הסכום הזה אחורה לזמן אפס, הוא הופך עבורנו לערך עתידי (FV).\nשלב ג': הצבה. מציבים את הסכום כ-FV, מגדירים PMT=0 (כי אין תזרימים בתקופת ההמתנה), ומבצעים התאמה לאחור להיום."
             },
             {
                 id: 5,
@@ -261,7 +261,7 @@
                     { id: 'd', text: "אקסל לא מסוגל לפתור שאלות כאלו ללא שימוש בפונקציית GOAL SEEK." }
                 ],
                 correctId: 'c',
-                explanation: "נכון מאוד! באקטואריה אנחנו תמיד בונים 'הר' (הקופה הנדרשת שמחושבת על בסיס סדרת המשיכות הידועה), ולאחר מכן משתמשים בהר זה (כ-FV) כדי לגלות כמה עלינו להפקיד (PMT) בשלבי החיסכון כדי לבנות אותו."
+                explanation: "שלב א': זיהוי הסדרה המלאה. מתחילים תמיד מהשלב בו יש לנו את כל הנתונים - סדרת המשיכות בפנסיה. מחשבים את הערך הנוכחי (PV) שלה ליום הפרישה ('בונים את ההר').\nשלב ב': גזירה לאחור. לוקחים את הקופה הנדרשת (ה-PV מצעד א') ומציבים אותה כערך עתידי יעד (FV) לתקופת החיסכון.\nשלב ג': חילוץ. מחשבים את ה-PMT הנדרש כדי להגיע לאותו FV מנקודת פתיחה של אפס."
             }
         ];
 
@@ -298,7 +298,7 @@
                         generalHint: "כמה תשלומים קיימים בסדרה שאיברה הראשון מופיע בזמן 7?",
                         expected: { rate: "6", nper: "35", pmt: "250000", pv: "-3624558", fv: "0", type: "0" },
                         fieldExplanations: {
-                            rate: "הואיל ופרק הזמן בין תשלומים הוא שנה, יש להזין כאן ריבית שנתית (ללא סימן אחוז), שאכן נתונה בשאלה (6).",
+                            rate: "הואיל ופרק הזמן בין תשלומים הוא שנה, יש להזין כאן ריבית שנתית (ללא סימן אחוז בסימולטור זה), שאכן נתונה בשאלה (6).",
                             nper: "מספר תזרימי המזומנים הנתונים כאן הוא 35, כי היא מתכננת לעבוד במקצוע במשך 35 שנים.",
                             pmt: "סכום תזרים המזומנים התקופתי הקבוע הנתון בשאלה הוא 250000.",
                             fv: "לא נותר סכום חד-פעמי בסוף תקופת העבודה, לכן 0.",
@@ -372,7 +372,7 @@
                         generalHint: "מספר תזרימי המזומנים הנתונים כאן הוא נגזרת של מספר שנות הפנסיה כפול חודשי השנה.",
                         expected: { rate: "0.4", nper: "240", pmt: "12000", pv: "-1855103", fv: "0", type: "1" },
                         fieldExplanations: {
-                            rate: "הואיל ופרק הזמן בין תשלומים הוא חודש, יש להזין כאן ריבית חודשית (ללא סימן אחוז), שאכן נתונה בשאלה (0.4).",
+                            rate: "הואיל ופרק הזמן בין תשלומים הוא חודש, יש להזין כאן ריבית חודשית (ללא סימן אחוז בסימולטור), שאכן נתונה בשאלה (0.4).",
                             nper: "מספר תזרימי המזומנים הנתונים כאן הוא 240, כי מדובר ב-20 שנות פנסיה חודשיות (20 * 12).",
                             pmt: "סכום תזרים המזומנים התקופתי הקבוע הוא 12,000.",
                             fv: "המטרה היא לרוקן את הקופה לחלוטין, לכן הערך העתידי הנותר הוא 0.",
@@ -558,9 +558,12 @@
                                 <span className="bg-brand-100 text-brand-600 p-2 rounded-lg text-xl">1</span>
                                 הרציונל: למה בכלל "ערך נוכחי"?
                             </h2>
-                            <p className="text-lg text-slate-700 leading-relaxed">
+                            <p className="text-lg text-slate-700 leading-relaxed mb-4">
                                 בעולם המימון, סכום כסף שיתקבל בעתיד אינו שווה לערכו היום. זאת משום שסכום זמין היום ניתן להשקעה נושאת ריבית. פונקציית ה-PV (Present Value) מבצעת התאמה לאחור ומחשבת את השווי של תזרימים עתידיים במונחי ההווה.
                             </p>
+                            <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-800">
+                                <strong>💡 הערה חשובה לגבי ריבית:</strong> באקסל האמיתי, חובה להזין את הריבית עם סימן האחוז (למשל <code>6%</code>) או כשבר עשרוני (<code>0.06</code>). בסימולטור שלנו, לצורך נוחות הקלדה ומיקוד בלוגיקה, נזין את המספר השלם בלבד (למשל <code>6</code>).
+                            </div>
                         </Card>
 
                         <Card delay="200ms" className="bg-gradient-to-br from-brand-600 to-brand-800 text-white border-0">
@@ -601,7 +604,7 @@
                                 <div className="flex-1 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
                                     <div className="text-3xl mb-2">🏔️</div>
                                     <div className="font-bold text-brand-700 mb-1">שלב א': שווי הסדרה</div>
-                                    <div className="text-sm text-slate-600">יש לפעול כך שסדרת התזרימים המאוחרת ביותר מטופלת תחילה. מחשבים את הערך הנוכחי שלה בנפרד.</div>
+                                    <div className="text-sm text-slate-600">יש לפעול כך שסדרת התזרימים המאוחרת ביותר מטופלת תחילה. מחשבים את הערך הנוכחי שלה בנפרד לנקודת הזמן הרלוונטית.</div>
                                 </div>
                                 <div className="flex items-center justify-center text-2xl text-slate-400 rotate-90 md:rotate-180 font-bold">⬅️</div>
                                 <div className="flex-1 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
@@ -708,8 +711,7 @@
             );
         };
 
-        const FinalSummary = ({ answers, questions, onRestart }) => {
-            // If answers is missing, it means they skipped the quiz.
+        const FinalSummary = ({ answers, questions, onRestart, onRetryQuiz }) => {
             const skippedQuiz = !answers;
             
             let score = 0;
@@ -728,7 +730,7 @@
                 ? "מושלם! הפגנת שליטה אבסולוטית בחומר. אתה מבין לעומק את תכסיס הגלגול לאחור, קופץ בקלות בין Type 0 ל-Type 1, ושולט באפיון תזרימי מזומנים מורכבים. אתה מוכן לחלוטין למבחן!"
                 : score >= 80 
                 ? "עבודה מצוינת! יש לך הבנה מעמיקה מאוד של עקרונות המימון והנוסחאות. עשה חזרה קלה על השאלות שבהן טעית, ואתה מסודר."
-                : "יש לך בסיס טוב, אך ניכר שנדרשת חזרה נוספת על כללי ה-Type ועל מתודולוגיית העבודה מול תזרימים נדחים (עבודה מהסוף להתחלה). מומלץ לחזור על הלומדה מחדש.";
+                : "יש לך בסיס טוב, אך ניכר שנדרשת חזרה נוספת על כללי ה-Type ועל מתודולוגיית העבודה מול תזרימים נדחים (עבודה מהסוף להתחלה). מומלץ לחזור על הבוחן מחדש.";
 
             return (
                 <div className="max-w-4xl mx-auto py-16 px-4 animate-fade-in">
@@ -761,16 +763,26 @@
                             </div>
                         </div>
 
-                        <div className="flex justify-center">
-                            <Button onClick={onRestart} variant="primary" className="text-lg px-10 py-4 shadow-xl">
-                                התחל תרגול מחדש 🔄
+                        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
+                            <Button onClick={onRestart} variant="outline" className="text-lg px-8 py-3 bg-white">
+                                התחל תרגול מלא מחדש 🔄
                             </Button>
+                            {!skippedQuiz && score < 100 && (
+                                <Button onClick={onRetryQuiz} variant="primary" className="text-lg px-8 py-3">
+                                    נסה מבחן מחדש 📝
+                                </Button>
+                            )}
+                            {skippedQuiz && (
+                                <Button onClick={onRetryQuiz} variant="primary" className="text-lg px-8 py-3">
+                                    אני רוצה לנסות את הבוחן 📝
+                                </Button>
+                            )}
                         </div>
                     </Card>
 
                     {!skippedQuiz && (
                         <div className="space-y-6">
-                            <h3 className="text-2xl font-bold text-slate-800 mb-6 px-2">פירוט התשובות לבוחן:</h3>
+                            <h3 className="text-2xl font-bold text-slate-800 mb-6 px-2">פירוט רב-שלבי לתשובות הבוחן:</h3>
                             {questions.map((q, idx) => {
                                 const userAnswerId = answers[q.id];
                                 const isCorrect = userAnswerId === q.correctId;
@@ -786,13 +798,13 @@
                                                 <span>{userAnswerText}</span>
                                             </div>
                                         </div>
-                                        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                                            <span className="text-brand-600 text-sm font-bold uppercase tracking-wider flex items-center gap-1 mb-2">
-                                                <span>💡</span> משוב והסבר:
+                                        <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+                                            <span className="text-brand-600 text-sm font-bold uppercase tracking-wider flex items-center gap-1 mb-3">
+                                                <span>💡</span> רציונל והסבר רב-שלבי:
                                             </span>
-                                            <p className="text-slate-700 leading-relaxed">
+                                            <div className="text-slate-700 leading-relaxed whitespace-pre-line">
                                                 {q.explanation}
-                                            </p>
+                                            </div>
                                         </div>
                                     </div>
                                 );
@@ -890,6 +902,12 @@
                 setQuizAnswers(null);
                 resetStepState();
                 setView('intro');
+                window.scrollTo(0,0);
+            };
+
+            const retryQuiz = () => {
+                setQuizAnswers(null);
+                setView('quiz');
                 window.scrollTo(0,0);
             };
 
@@ -1048,7 +1066,7 @@
             if (view === 'intro') return <IntroTutorial onStart={startPractice} />;
             if (view === 'quiz_prompt') return <QuizPrompt onDecline={() => setView('summary')} onAccept={() => setView('quiz')} />;
             if (view === 'quiz') return <QuizSystem questions={QUIZ_DATA} onComplete={(ans) => { setQuizAnswers(ans); setView('summary'); fireConfetti('victory'); window.scrollTo(0,0); }} />;
-            if (view === 'summary') return <FinalSummary answers={quizAnswers} questions={QUIZ_DATA} onRestart={restartAll} />;
+            if (view === 'summary') return <FinalSummary answers={quizAnswers} questions={QUIZ_DATA} onRestart={restartAll} onRetryQuiz={retryQuiz} />;
 
             const currentQ = DATA[qIndex];
             const currentStep = currentQ.steps[stepIndex];
@@ -1248,7 +1266,7 @@
                                                 
                                                 <div className="text-center mt-2 mb-4">
                                                     <span className="inline-block bg-rose-100 text-rose-800 px-4 py-2 rounded-lg font-bold text-sm border border-rose-200 shadow-sm">
-                                                        🚨 שים לב: יש להזין את הריבית (Rate) תמיד ללא סימן %
+                                                        🚨 שים לב: בסימולטור זה יש להזין את הריבית (Rate) תמיד ללא סימן %
                                                     </span>
                                                 </div>
                                                 
