@@ -113,23 +113,23 @@ const ExcelSimulator = ({ defaultRate = "" }) => {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
         <div>
           <label className="block text-xs font-bold mb-1">Rate (%)</label>
-          <input type="number" value={rate} onChange={e=>setRate(e.target.value)} className="w-full p-2 border rounded font-mono text-left bg-white border-[#107c41]/30 focus:ring-2 focus:ring-[#107c41] outline-none" dir="ltr" />
+          <input type="number" step="any" value={rate} onChange={e=>setRate(e.target.value)} className="w-full p-2 border rounded font-mono text-left bg-white border-[#107c41]/30 focus:ring-2 focus:ring-[#107c41] outline-none" dir="ltr" />
         </div>
         <div>
           <label className="block text-xs font-bold mb-1">Nper</label>
-          <input type="number" value={nper} onChange={e=>setNper(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
+          <input type="number" step="any" value={nper} onChange={e=>setNper(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
         </div>
         <div>
           <label className="block text-xs font-bold mb-1">Pmt</label>
-          <input type="number" value={pmt} onChange={e=>setPmt(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
+          <input type="number" step="any" value={pmt} onChange={e=>setPmt(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
         </div>
         <div>
           <label className="block text-xs font-bold mb-1">PV</label>
-          <input type="number" value={pv} onChange={e=>setPv(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
+          <input type="number" step="any" value={pv} onChange={e=>setPv(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
         </div>
         <div>
           <label className="block text-xs font-bold mb-1">FV</label>
-          <input type="number" value={fv} onChange={e=>setFv(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
+          <input type="number" step="any" value={fv} onChange={e=>setFv(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
         </div>
       </div>
 
