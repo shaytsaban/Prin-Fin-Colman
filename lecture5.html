@@ -1,1182 +1,1210 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, CheckCircle2, XCircle, Lightbulb, BookOpen, Calculator, Info, Target, Coins, TrendingUp, AlertTriangle, FastForward, GraduationCap, Table } from 'lucide-react';
-
-// --- Confetti Effect Component ---
-const Confetti = () => {
-  const [isVisible, setIsVisible] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(false), 4000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!isVisible) return null;
-  const colors = ['#fce18a', '#ff726d', '#b48def', '#f4306d', '#42e2b8', '#3b82f6', '#10b981'];
-  
-  return (
-    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-      {[...Array(60)].map((_, i) => (
-        <div
-          key={i}
-          className="absolute animate-confetti rounded-sm"
-          style={{
-            left: `${Math.random() * 100}vw`,
-            top: `-20px`,
-            width: `${Math.random() * 12 + 6}px`,
-            height: `${Math.random() * 12 + 6}px`,
-            backgroundColor: colors[Math.floor(Math.random() * colors.length)],
-            animationDelay: `${Math.random() * 2}s`,
-            animationDuration: `${Math.random() * 2 + 2}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// --- Beautiful Math Components (Native JSX without external LaTeX parsers) ---
-const BeautifulMath = ({ children, inline = false }) => {
-  const Tag = inline ? 'span' : 'div';
-  return (
-    <Tag 
-      dir="ltr" 
-      className={`tracking-wide text-slate-800 ${inline ? 'inline-flex items-center mx-1 font-semibold text-[1.1em]' : 'flex items-center justify-center my-3 text-xl bg-white shadow-sm px-4 py-3 rounded-lg border border-slate-200'}`}
-      style={{ fontFamily: '"Cambria Math", "Times New Roman", serif' }}
-    >
-      {children}
-    </Tag>
-  );
-};
-
-// Fraction component to simulate LaTeX \frac
-const Fraction = ({ num, den }) => (
-  <span className="inline-flex flex-col items-center justify-center align-middle mx-1 font-serif text-[0.95em]">
-    <span className="border-b-[1.5px] border-slate-800 px-1 w-full text-center leading-tight pb-[1px]">{num}</span>
-    <span className="px-1 w-full text-center leading-tight pt-[1px]">{den}</span>
-  </span>
-);
-
-const MathText = ({ children }) => (
-  <span style={{ fontStyle: 'normal', fontFamily: 'sans-serif' }} className="px-1 text-[0.9em]">
-    {children}
-  </span>
-);
-
-// --- Excel Simulator Component ---
-const ExcelSimulator = ({ defaultRate = "" }) => {
-  const [rate, setRate] = useState(defaultRate);
-  const [nper, setNper] = useState("");
-  const [pmt, setPmt] = useState("");
-  const [pv, setPv] = useState("0");
-  const [fv, setFv] = useState("0");
-  const [result, setResult] = useState(null);
-  const [calcType, setCalcType] = useState('FV');
-
-  const calculate = () => {
-    const r = parseFloat(rate) / 100;
-    const n = parseFloat(nper);
-    const p = parseFloat(pmt);
-    const p_v = parseFloat(pv);
-    const f_v = parseFloat(fv);
-
-    if (isNaN(r) || isNaN(n) || isNaN(p)) {
-      setResult("חסרים נתונים (Rate, Nper, Pmt)");
-      return;
-    }
-
-    if (calcType === 'FV') {
-      let calcFV = 0;
-      if (r === 0) {
-        calcFV = -(p_v + p * n);
-      } else {
-        calcFV = -(p_v * Math.pow(1 + r, n) + p * (Math.pow(1 + r, n) - 1) / r);
-      }
-      setResult(`FV = ${calcFV.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
-    } else {
-      let calcPV = 0;
-      if (r === 0) {
-        calcPV = -(p * n + f_v);
-      } else {
-        calcPV = -(p * (1 - Math.pow(1 + r, -n)) / r + f_v * Math.pow(1 + r, -n));
-      }
-      setResult(`PV = ${calcPV.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
-    }
-  };
-
-  return (
-    <div className="bg-[#107c41]/5 p-6 rounded-2xl border-2 border-[#107c41]/20 mt-6 shadow-sm">
-      <div className="flex items-center gap-3 mb-4 text-[#107c41]">
-        <Table size={24} />
-        <h4 className="font-bold text-xl">סימולטור פונקציות אקסל</h4>
-      </div>
-      <p className="text-sm text-slate-600 mb-4 font-medium">הזן את הריבית האפקטיבית (Rate) שחישבת למעלה! שים לב לסימנים (השקעה = מינוס, תקבול = פלוס).</p>
-      
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
-        <div>
-          <label className="block text-xs font-bold mb-1">Rate (%)</label>
-          <input type="number" step="any" value={rate} onChange={e=>setRate(e.target.value)} className="w-full p-2 border rounded font-mono text-left bg-white border-[#107c41]/30 focus:ring-2 focus:ring-[#107c41] outline-none" dir="ltr" />
-        </div>
-        <div>
-          <label className="block text-xs font-bold mb-1">Nper</label>
-          <input type="number" step="any" value={nper} onChange={e=>setNper(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
-        </div>
-        <div>
-          <label className="block text-xs font-bold mb-1">Pmt</label>
-          <input type="number" step="any" value={pmt} onChange={e=>setPmt(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
-        </div>
-        <div>
-          <label className="block text-xs font-bold mb-1">PV</label>
-          <input type="number" step="any" value={pv} onChange={e=>setPv(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
-        </div>
-        <div>
-          <label className="block text-xs font-bold mb-1">FV</label>
-          <input type="number" step="any" value={fv} onChange={e=>setFv(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3 border-t border-[#107c41]/20 pt-4">
-        <button onClick={() => { setCalcType('FV'); setTimeout(calculate, 50); }} className="bg-[#107c41] hover:bg-[#0c5a2f] text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-md">
-          חשב FV
-        </button>
-        <button onClick={() => { setCalcType('PV'); setTimeout(calculate, 50); }} className="bg-white border-2 border-[#107c41] text-[#107c41] hover:bg-[#107c41]/10 font-bold py-2 px-6 rounded-lg transition-colors shadow-sm">
-          חשב PV
-        </button>
-        
-        {result && (
-          <div className="mr-auto bg-white px-4 py-2 rounded-lg border-2 border-[#107c41] font-mono font-bold text-lg text-[#107c41] shadow-sm animate-fade-in" dir="ltr">
-            {result}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-
-// --- Content Data ---
-const courseContent = [
-  {
-    type: 'theory',
-    title: 'פרק 1: למה אנחנו בכלל צריכים "ריבית אפקטיבית"?',
-    icon: <BookOpen className="text-blue-500" size={32} />,
-    content: (
-      <div className="space-y-5 text-slate-700 leading-relaxed text-lg">
-        <p>
-          תארו לכם שאתם לוקחים הלוואה, והבנק אומר לכם: <strong className="text-blue-600">"הריבית היא 8% בשנה"</strong>. נשמע פשוט, נכון?
-          אבל בפועל, בסוף השנה אתם מגלים ששילמתם 8.24% ואפילו יותר. איך זה קרה? 
-        </p>
-        <p>
-          התשובה היא ש<strong>הריבית הנקובה</strong> (זו שרשומה בחוזה) היא רק נקודת ההתחלה. באותיות הקטנות של החוזה מסתתרים גורמים שמשנים את התמונה ומייצרים את מה שאנו קוראים לו <strong>הריבית האפקטיבית</strong> (הריבית "האמיתית" בפועל).
-        </p>
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm mt-4">
-          <h4 className="font-bold text-indigo-900 mb-4 flex items-center gap-2 text-xl border-b border-indigo-200 pb-2">
-            <Info size={24} className="text-indigo-600" />
-            4 המרכיבים שמשפיעים על הריבית האמיתית:
-          </h4>
-          <ol className="list-decimal list-inside space-y-4 text-indigo-950 pr-2">
-            <li><strong className="text-indigo-800">ריבית חוזית / נקובה:</strong> הריבית "היבשה" שמופיעה בחוזה. זו הריבית לפני שאר ההשפעות.</li>
-            <li><strong className="text-indigo-800">ריבית דריבית:</strong> כשהבנק מחשב את הריבית מספר פעמים לאורך התקופה, הריבית מתווספת לקרן ("צוברת ריבית"), מה שמגדיל את העלות הכוללת.</li>
-            <li><strong className="text-indigo-800">ריבית מראש:</strong> מצבים בהם הבנק מנכה עמלות או ריבית מראש מסכום ההלוואה. אתם מקבלים פחות כסף ביד, ולכן באחוזים שילמתם יותר.</li>
-            <li><strong className="text-indigo-800">עמלות ו"אותיות קטנות":</strong> עמלות פתיחת תיק, דמי ניהול וכו', שמתפקדות כעלות מימון לכל דבר.</li>
-          </ol>
-        </div>
-      </div>
-    )
-  },
-  {
-    type: 'theory',
-    title: 'פרק 2: ארגז הכלים והנוסחאות',
-    icon: <Calculator className="text-emerald-500" size={32} />,
-    content: (
-      <div className="space-y-6 text-slate-700 leading-relaxed text-lg">
-        <p>בקורס הזה נתמקד בעיקר בהשפעה של <strong>ריבית דריבית</strong>. לשם כך, אנו נשענים על 4 נוסחאות מרכזיות. קחו רגע להכיר אותן בצורתן המלאה:</p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          <div className="bg-white p-5 rounded-xl shadow-md border-t-4 border-indigo-400">
-            <h4 className="font-bold text-indigo-800 mb-2 text-lg">1. מציאת הריבית לתקופת חישוב אחת</h4>
-            <BeautifulMath>
-              <i className="mr-1">R<sub>t</sub></i> = <Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} />
-            </BeautifulMath>
-            <ul className="text-sm text-slate-600 mt-3 list-disc list-inside space-y-1">
-              <li><BeautifulMath inline><i className="mx-1">R</i></BeautifulMath> = הריבית הנקובה הנתונה.</li>
-              <li><BeautifulMath inline><i className="mx-1">n</i></BeautifulMath> = כמה פעמים מחשבים ריבית בתקופה הנקובה.</li>
-            </ul>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-md border-t-4 border-emerald-400">
-            <h4 className="font-bold text-emerald-800 mb-2 text-lg">2. המרה מנקובה לאפקטיבית</h4>
-            <BeautifulMath>
-              <i className="mr-1">r<sub>e</sub></i> = (1 + <Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} />)<sup><i className="ml-1">m</i></sup> - 1
-            </BeautifulMath>
-            <ul className="text-sm text-slate-600 mt-3 list-disc list-inside space-y-1">
-              <li><BeautifulMath inline><i className="mx-1">m</i></BeautifulMath> = יחס התקופות: <MathText>רצוי / מצוי.</MathText></li>
-            </ul>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-md border-t-4 border-amber-400">
-            <h4 className="font-bold text-amber-800 mb-2 text-lg">3. מאפקטיבית לאפקטיבית (חזקה בלבד)</h4>
-            <BeautifulMath>
-              <i className="mr-1">r<sub>e</sub></i> = (1 + <i className="mx-1">r</i>)<sup><i className="ml-1">m</i></sup> - 1
-            </BeautifulMath>
-            <ul className="text-sm text-slate-600 mt-3 list-disc list-inside space-y-1">
-              <li><BeautifulMath inline><i className="mx-1">r</i></BeautifulMath> = הריבית האפקטיבית הקיימת.</li>
-            </ul>
-          </div>
-
-          <div className="bg-white p-5 rounded-xl shadow-md border-t-4 border-rose-400">
-            <h4 className="font-bold text-rose-800 mb-2 text-lg">4. עסקאות בתשלום אחד (תזרים ישיר)</h4>
-            <BeautifulMath>
-              <i className="mr-1">r<sub>e</sub></i> = <Fraction num={<>|<i className="mx-1">P<sub>t</sub></i>|</>} den={<>|<i className="mx-1">P<sub>0</sub></i>|</>} /> - 1
-            </BeautifulMath>
-            <ul className="text-sm text-slate-600 mt-3 flex justify-around">
-              <li><BeautifulMath inline><i className="mx-1">P<sub>t</sub></i></BeautifulMath> = תשלום סופי.</li>
-              <li><BeautifulMath inline><i className="mx-1">P<sub>0</sub></i></BeautifulMath> = קבלה התחלתית.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    )
-  },
-  {
-    type: 'theory',
-    title: 'פרק 3: איך לפצח את m ו-n? (הסוד האמיתי)',
-    icon: <Target className="text-purple-500" size={32} />,
-    content: (
-      <div className="space-y-4 text-slate-700 leading-relaxed text-lg">
-        <p>
-          הנוסחאות אולי נראות מורכבות, אבל 90% מהטעויות נובעות מבלבול בין שני פרמטרים מרכזיים: <BeautifulMath inline><i className="mx-1">n</i></BeautifulMath> ו- <BeautifulMath inline><i className="mx-1">m</i></BeautifulMath>. בואו נעשה בהם סדר אחת ולתמיד.
-        </p>
-
-        <div className="bg-purple-50 p-6 rounded-2xl border border-purple-200 shadow-sm relative overflow-hidden mb-6">
-          <h3 className="font-bold text-purple-900 mb-2 text-xl">מי אתה, פרמטר n? ולמה אני צריך אותו?</h3>
-          <p className="mb-4 text-purple-900 font-medium">
-            <strong>בשביל מה אני צריך את זה?</strong> אם הריבית הנקובה נתונה ומחושבת מספר פעמים, השלב הראשון הוא <strong>להמיר אותה לריבית בסיס</strong> – לתקופת חישוב אחת בלבד, על ידי חלוקתה ב-n.
-          </p>
-          <div className="bg-white p-4 rounded-xl text-center border border-purple-100 font-bold text-purple-800 text-lg mb-4">
-            <BeautifulMath inline><i className="mx-1">n</i></BeautifulMath> מוגדר כ-מספר תקופות חישוב הריבית "שנכללות" בתוך תקופת הריבית הנקובה הנתונה.
-          </div>
-          <p className="text-purple-900">
-            אפשר לחשב זאת על ידי היחס: <strong className="bg-purple-200 px-2 py-1 rounded">(התקופה הנקובה) / (תדירות החישוב)</strong>.
-            <br/><br/>
-            <strong>לדוגמה מספרית:</strong> אם הריבית הנתונה היא <strong>שנתית</strong> (12 חודשים) והיא מחושבת <strong>כל חודש</strong> (1 חודש). 
-            אז ה-n יהיה 12 (שנה חלקי חודש, <MathText dir="ltr">12/1</MathText>). המונה <BeautifulMath inline><i className="mx-1">R</i></BeautifulMath> יהיה שיעור הריבית הנקובה הנתונה.
-          </p>
-        </div>
-
-        <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-200 shadow-sm relative overflow-hidden">
-          <h3 className="font-bold text-indigo-900 mb-2 text-xl">מי אתה, פרמטר m? (כלל רצוי/מצוי)</h3>
-          <p className="mb-4">ה- <BeautifulMath inline><i className="mx-1">m</i></BeautifulMath> הוא מעריך החזקה. הוא לוקח את ריבית הבסיס שמצאנו, ומנפח אותה לתקופה <strong>שהלקוח ביקש</strong> (התקופה הרצויה).</p>
-          <div className="bg-white p-4 rounded-xl text-center border border-indigo-100 font-bold text-indigo-800 text-xl flex items-center justify-center gap-4">
-            <BeautifulMath inline>
-              <i className="mr-2">m</i> = <Fraction num={<MathText>רצוי (התקופה שביקשו)</MathText>} den={<MathText>מצוי (תדירות החישוב בבנק)</MathText>} />
-            </BeautifulMath>
-          </div>
-          <p className="text-indigo-900 mt-4">
-            <strong>לדוגמה מספרית:</strong> אם שאלו "מה הריבית <strong>לשנתיים</strong>?" (רצוי = 24 חודשים), והבנק מחשב <strong>כל חודש</strong> (מצוי = 1).
-            ה-m יהיה 24 (24 חלקי 1).
-          </p>
-        </div>
-      </div>
-    )
-  },
-  {
-    type: 'exercise',
-    title: 'תרגיל 1.1: לפרק את הנוסחה – פרמטרים (מספרים עגולים)',
-    autoCalculate: true,
-    formulaInfo: {
-      formulaJSX: (
-        <div className="flex flex-col gap-3 items-center">
-          <BeautifulMath>
-             <i className="mr-1">r<sub>e</sub></i> = (1 + <Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} />)<sup><i className="ml-1">m</i></sup> - 1
-          </BeautifulMath>
-          <div className="text-sm text-indigo-700 bg-indigo-100/50 px-4 py-2 rounded-lg">
-            נמצא קודם את הפרמטרים <BeautifulMath inline><i className="mx-1">n</i></BeautifulMath>,  <BeautifulMath inline><Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} /></BeautifulMath> ו- <BeautifulMath inline><i className="mx-1">m</i></BeautifulMath>. המערכת תחשב את השאר בשבילך!
-          </div>
-        </div>
-      ),
-      params: [
-        { name: 'R', desc: 'ריבית נקובה הנתונה' },
-        { name: 'n', desc: 'מספר תקופות החישוב שנכללות בתקופה הנקובה הנתונה' },
-        { name: 'm', desc: 'מעריך חזקה: רצוי (התקופה שביקשו) חלקי מצוי (תדירות החישוב)' }
-      ]
-    },
-    question: 'בנק מציע הלוואה בריבית נקובה חצי-שנתית של 12%. ידוע כי הבנק מחשב את הריבית בפועל כל חודש. נשאלתם מהי הריבית האפקטיבית השנתית. \n\n**מצאו תחילה את הפרמטרים להצבה, והנוסחה תחשב זאת עבורכם.**',
-    params: [
-      { label: 'ריבית נקובה (R)', value: '12%' },
-      { label: 'תקופת הריבית הנקובה', value: 'חצי שנה (6 חודשים)' },
-      { label: 'תדירות חישוב (מצוי)', value: '1 חודש' },
-      { label: 'תקופה נדרשת (רצוי)', value: 'שנה (12 חודשים)' }
-    ],
-    steps: [
-      {
-        id: 'n',
-        title: 'שלב 1: מציאת פרמטר n',
-        prompt: 'הגדרנו ש-n הוא מספר תקופות החישוב שנכללות בתקופת הריבית הנקובה הנתונה. חשב את n:',
-        hint: 'תקופת הריבית הנקובה היא 6 חודשים. תדירות החישוב היא חודש 1. 6 חלקי 1.',
-        correctAnswer: 6,
-        solutionJSX: <BeautifulMath><i className="mr-1">n</i> = <Fraction num="6" den="1" /> = 6</BeautifulMath>,
-        validate: (val) => {
-          if (val === 12) return "12 זה מספר החודשים בשנה. שים לב שתקופת הריבית *הנקובה* היא חצי שנה בלבד.";
-          if (val === 1) return "1 זו התקופה המצויה. התקופה הנקובה היא 6.";
-          if (val === 6) return true;
-          return "חלק את התקופה הנקובה (6) בתדירות החישוב (1).";
-        },
-        successMessage: "מצוין. המשמעות של n=6 היא שהריבית שנתנו לנו (12%) מורכבת מ-6 תחנות חישוב שונות (חודשים)."
-      },
-      {
-        id: 'rt',
-        title: 'שלב 2: הריבית התקופתית (R/n)',
-        prompt: 'אנו רוצים להמיר את הריבית הנתונה לריבית בסיס (לתקופת חישוב אחת). חלקו את R ב-n:',
-        hint: 'הריבית הנקובה היא 12. ה-n שמצאנו הוא 6.',
-        correctAnswer: 2,
-        solutionJSX: <BeautifulMath><Fraction num={<><i className="mr-1">R</i></>} den={<><i className="mx-1">n</i></>} /> = <Fraction num="12%" den="6" /> = 2%</BeautifulMath>,
-        validate: (val) => {
-          if (val === 12) return "12 זו הריבית לחצי שנה כולה. עלינו לחלק אותה ב-n.";
-          if (val === 2) return true;
-          return "12 לחלק ל-6.";
-        },
-        successMessage: "כל הכבוד, זה בעצם R הריבית הנקובה חלקי n מספר תקופות החישוב. זו למעשה ריבית הבסיס; היא גם הנקובה וגם האפקטיבית, אבל היא לתקופת חישוב אחת (חודש). כעת, בוא ננסה להמיר אותה לשנה."
-      },
-      {
-        id: 'm',
-        title: 'שלב 3: מעריך החזקה (m)',
-        prompt: 'השתמש בכלל: רצוי (התקופה שביקשו) חלקי מצוי (תדירות החישוב). מצא את m:',
-        hint: 'רצוי = 12 חודשים (שנה). מצוי = 1 חודש. 12 חלקי 1.',
-        correctAnswer: 12,
-        solutionJSX: <BeautifulMath><i className="mr-1">m</i> = <Fraction num={<MathText>רצוי (12)</MathText>} den={<MathText>מצוי (1)</MathText>} /> = 12</BeautifulMath>,
-        validate: (val) => {
-          if (val === 6) return "6 זה רק לחצי שנה. שים לב ששאלו מהי הריבית האפקטיבית ל*שנה* שלמה.";
-          if (val === 12) return true;
-          return "רצוי (12) חלקי מצוי (1).";
-        },
-        successMessage: "מעולה. מצאנו ש-m=12. המשמעות היא שצריך 'להקפיץ' את ריבית הבסיס (2%) ב-12 תחנות כדי לקבל את האפקטיבית השנתית."
-      }
-    ],
-    summaryCalc: {
-      formulaJSX: <BeautifulMath><i className="mr-1">r<sub>e</sub></i> = (1 + 0.02)<sup>12</sup> - 1 = 26.82%</BeautifulMath>,
-      explanation: 'המערכת הציבה את הפרמטרים שמצאתם אל תוך הנוסחה המלאה. במקום להתבלבל, פירקנו את החישוב לשלבים בטוחים והגענו לריבית האפקטיבית המדויקת.'
-    }
-  },
-  {
-    type: 'exercise',
-    title: 'תרגיל 1.2: זיהוי פרמטרים והצבה אוטומטית (רבעונים)',
-    autoCalculate: true,
-    formulaInfo: {
-      formulaJSX: (
-        <BeautifulMath>
-           <i className="mr-1">r<sub>e</sub></i> = (1 + <Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} />)<sup><i className="ml-1">m</i></sup> - 1
-        </BeautifulMath>
-      ),
-      params: []
-    },
-    question: 'חברת אשראי מציעה הלוואה בריבית נקובה שנתית של 24%. החישוב מתבצע כל רבעון (3 חודשים). הלקוח שואל את עצמו, מהי הריבית לכל חצי שנה. \nהזינו רק את הפרמטרים!',
-    params: [
-      { label: 'ריבית נקובה (R)', value: '24%' },
-      { label: 'תקופת הריבית הנקובה', value: '12 חודשים (שנה)' },
-      { label: 'תדירות חישוב (מצוי)', value: '3 חודשים (רבעון)' },
-      { label: 'תקופה נדרשת (רצוי)', value: '6 חודשים (חצי שנה)' }
-    ],
-    steps: [
-      {
-        id: 'n',
-        title: 'שלב 1: מציאת n',
-        prompt: 'כמה רבעונים (3 חודשים) נכנסים בתוך התקופה הנקובה (12 חודשים)?',
-        hint: '12 חלקי 3.',
-        correctAnswer: 4,
-        solutionJSX: <BeautifulMath><i className="mr-1">n</i> = <Fraction num="12" den="3" /> = 4</BeautifulMath>,
-        validate: (val) => val === 4 ? true : "12 חלקי 3.",
-        successMessage: "נכון. יש 4 רבעונים בשנה. ה-24% מחולקים ל-4 תחנות שונות."
-      },
-      {
-        id: 'rt',
-        title: 'שלב 2: הריבית לתקופת חישוב (R/n)',
-        prompt: 'מהי הריבית לרבעון אחד באחוזים?',
-        hint: '24 חלקי 4.',
-        correctAnswer: 6,
-        solutionJSX: <BeautifulMath><Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} /> = <Fraction num="24%" den="4" /> = 6%</BeautifulMath>,
-        validate: (val) => val === 6 ? true : "חלק את 24 ב-4.",
-        successMessage: "יפה מאד. קיבלנו שריבית הבסיס לתקופת חישוב היא 6%. זו הריבית האפקטיבית לרבעון."
-      },
-      {
-        id: 'm',
-        title: 'שלב 3: מעריך החזקה (m)',
-        prompt: 'רצוי חלקי מצוי: הלקוח רוצה ריבית לחצי שנה (6 חודשים). החישוב הוא כל רבעון (3 חודשים). מהו m?',
-        hint: 'רצוי (6) חלקי מצוי (3).',
-        correctAnswer: 2,
-        solutionJSX: <BeautifulMath><i className="mr-1">m</i> = <Fraction num={<MathText>רצוי (6)</MathText>} den={<MathText>מצוי (3)</MathText>} /> = 2</BeautifulMath>,
-        validate: (val) => val === 2 ? true : "6 חלקי 3.",
-        successMessage: "בדיוק. כדי לחשב לחצי שנה, נצטרך 'להקפיץ' את הריבית הרבעונית שמצאנו 2 פעמים."
-      }
-    ],
-    summaryCalc: {
-      formulaJSX: <BeautifulMath><i className="mr-1">r<sub>e</sub></i> = (1 + 0.06)<sup>2</sup> - 1 = 12.36%</BeautifulMath>,
-      explanation: 'הצבנו את ריבית הבסיס (6%) ואת מעריך החזקה (2) אל תוך הנוסחה. התוצאה היא הריבית האפקטיבית לחצי שנה.'
-    }
-  },
-  {
-    type: 'exercise',
-    title: 'תרגיל 2.1: שברים במעריך החזקה',
-    autoCalculate: true,
-    formulaInfo: {
-      formulaJSX: (
-        <BeautifulMath>
-           <i className="mr-1">r<sub>e</sub></i> = (1 + <Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} />)<sup><i className="ml-1">m</i></sup> - 1
-        </BeautifulMath>
-      ),
-      params: []
-    },
-    question: 'הריבית הנתונה היא 10% לשנה (נקובה). מחושבת כל 6 חודשים (חצי שנה). מהי הריבית האפקטיבית לחודשיים?',
-    params: [
-      { label: 'ריבית נקובה (R)', value: '10%' },
-      { label: 'תקופת הריבית הנקובה', value: '12 חודשים' },
-      { label: 'תדירות חישוב (מצוי)', value: '6 חודשים' },
-      { label: 'תקופה נדרשת (רצוי)', value: '2 חודשים' }
-    ],
-    steps: [
-      {
-        id: 'n',
-        title: 'שלב 1: מציאת n',
-        prompt: 'תקופה נקובה חלקי תקופת חישוב. מצא את n:',
-        hint: '12 חודשים חלקי 6 חודשים.',
-        correctAnswer: 2,
-        solutionJSX: <BeautifulMath><i className="mr-1">n</i> = <Fraction num="12" den="6" /> = 2</BeautifulMath>,
-        validate: (val) => val === 2 ? true : "12 חלקי 6."
-      },
-      {
-        id: 'rt',
-        title: 'שלב 2: הריבית לתקופת חישוב (R/n)',
-        prompt: 'מהי ריבית הבסיס ל-6 חודשים?',
-        hint: '10 חלקי 2.',
-        correctAnswer: 5,
-        solutionJSX: <BeautifulMath><Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} /> = <Fraction num="10%" den="2" /> = 5%</BeautifulMath>,
-        validate: (val) => val === 5 ? true : "10 חלקי 2."
-      },
-      {
-        id: 'm_fraction',
-        title: 'שלב 3: מעריך החזקה (m)',
-        prompt: 'רצוי (2 חודשים) חלקי מצוי (6 חודשים). הזן את התשובה כשבר (למשל 1/3, או 2/6):',
-        hint: 'הרצוי הוא 2. המצוי הוא 6. אפשר גם לצמצם.',
-        correctAnswer: 1/3,
-        solutionJSX: <BeautifulMath><i className="mr-1">m</i> = <Fraction num="2" den="6" /> = <Fraction num="1" den="3" /></BeautifulMath>,
-        validate: (val) => {
-          let numVal = val;
-          if (typeof val === 'string' && val.includes('/')) {
-            const parts = val.split('/');
-            numVal = parseFloat(parts[0]) / parseFloat(parts[1]);
-          }
-          if (Math.abs(numVal - (1/3)) < 0.01) return true;
-          if (numVal === 3) return "הפוך! עשית מצוי (6) חלקי רצוי (2). זכור: הרצוי יושב במונה (למעלה).";
-          return "רצוי הוא 2, מצוי הוא 6. התוצאה היא 2/6 או שליש (1/3).";
-        },
-        successMessage: "מה למדנו כאן? שאפשר כמובן להציג ערכים בשברים במעריך! חזקה שברירית היא פשוט דרך להגיד שאנחנו לוקחים 'חלק' מתקופת החישוב המלאה."
-      }
-    ],
-    summaryCalc: {
-      formulaJSX: <BeautifulMath><i className="mr-1">r<sub>e</sub></i> = (1 + 0.05)<sup>1/3</sup> - 1 = 1.64%</BeautifulMath>,
-      explanation: 'העלאה בחזקת שבר מתבצעת בקלות במחשבון הפיננסי או המדעי. הריבית לחודשיים היא מעט פחות מחלק יחסי פשוט (שהיה נותן 1.66%) בגלל אפקט הדריבית.'
-    }
-  },
-  {
-    type: 'theory',
-    title: 'פרק 4: מלכודת האקסל וסדרות התשלומים',
-    icon: <TrendingUp className="text-orange-500" size={32} />,
-    content: (
-      <div className="space-y-4 text-slate-700 leading-relaxed text-lg">
-        <p>
-          כאשר נתקלים בחישוב ערך נוכחי (PV) או עתידי (FV) של <strong>סדרת תשלומים באקסל (PMT)</strong>, יש כלל ברזל אכזרי. תחילה, נזכיר את משמעות הפרמטרים באקסל:
-        </p>
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <table className="w-full text-right border-collapse">
-            <thead className="bg-slate-100 border-b border-slate-200 text-slate-800">
-              <tr>
-                <th className="p-3 font-bold border-l border-slate-200" dir="ltr">Parameter</th>
-                <th className="p-3 font-bold">משמעות בעברית</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
-              <tr><td className="p-3 font-mono font-bold border-l border-slate-200" dir="ltr">Rate</td><td className="p-3">שיעור הריבית לתקופת תשלום אחת (זה מה שנחשב!)</td></tr>
-              <tr><td className="p-3 font-mono font-bold border-l border-slate-200" dir="ltr">Nper</td><td className="p-3">מספר התשלומים הכולל בסדרה</td></tr>
-              <tr><td className="p-3 font-mono font-bold border-l border-slate-200" dir="ltr">Pmt</td><td className="p-3">התשלום התקופתי הקבוע</td></tr>
-              <tr><td className="p-3 font-mono font-bold border-l border-slate-200" dir="ltr">PV</td><td className="p-3">ערך נוכחי (סכום התחלתי)</td></tr>
-              <tr><td className="p-3 font-mono font-bold border-l border-slate-200" dir="ltr">FV</td><td className="p-3">ערך עתידי (סכום סופי)</td></tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <div className="bg-orange-50 p-6 rounded-2xl border-l-8 border-orange-400 shadow-sm mt-4">
-          <h3 className="font-bold text-orange-900 text-2xl mb-3">כלל הברזל לסדרות:</h3>
-          <p className="text-orange-800 text-xl font-medium bg-white p-4 rounded-lg inline-block border border-orange-200">
-            "כאשר עוסקים בסדרה (PMT שונה מאפס), ה-Rate חייב לייצג את <strong className="text-orange-600 underline">הריבית האפקטיבית לפרק הזמן שבין התשלומים</strong>!"
-          </p>
-          <p className="mt-4 text-orange-900">
-            כלומר: ה"רצוי" שלנו לריבית נקבע <strong>אך ורק</strong> לפי תדירות התשלום. תשלום כל חצי שנה? ה-Rate חייב להיות אפקטיבי לחצי שנה. בואו נראה את זה ב-3 דרגות קושי.
-          </p>
-        </div>
-      </div>
-    )
-  },
-  {
-    type: 'exercise',
-    title: 'תרגיל 4.1: רמה קלה - המרה מאפקטיבית לאפקטיבית (m<1)',
-    hasExcelSim: true,
-    formulaInfo: {
-      formulaJSX: (
-        <>
-          <BeautifulMath><i className="mr-1">r<sub>e</sub></i> = (1 + <i className="mx-1">r</i>)<sup><i className="ml-1">m</i></sup> - 1</BeautifulMath>
-          <div className="text-sm text-center text-indigo-700 mt-2">(משתמשים רק בחזקה כי הריבית הנתונה כבר אפקטיבית)</div>
-        </>
-      ),
-      params: []
-    },
-    question: 'שירה מפקידה 2,000 ש"ח בתום כל חצי שנה למשך 5 שנים. הריבית השנתית הנתונה היא 10% **אפקטיבית**. \n\nמהי הריבית (Rate) שיש להציב באקסל?',
-    params: [
-      { label: 'תדירות תשלום (הרצוי!)', value: '6 חודשים (חצי שנה)' },
-      { label: 'ריבית נתונה', value: '10% (אפקטיבית!)' },
-      { label: 'תקופה נתונה (המצוי)', value: '12 חודשים (שנה)' }
-    ],
-    steps: [
-      {
-        id: 'm',
-        title: 'שלב 1: מציאת m בלבד',
-        prompt: 'מכיוון שהריבית כבר אפקטיבית, אין לנו R/n! אנחנו מיד קופצים לחזקה. רצוי (תדירות התשלום) חלקי מצוי (תקופת הריבית הנתונה). מצא את m כשבר:',
-        hint: 'רצוי = 6, מצוי = 12. 6 חלקי 12.',
-        correctAnswer: 1/2,
-        solutionJSX: <BeautifulMath><i className="mr-1">m</i> = <Fraction num="6" den="12" /> = <Fraction num="1" den="2" /></BeautifulMath>,
-        validate: (val) => {
-          let numVal = val;
-          if (typeof val === 'string' && val.includes('/')) {
-            const parts = val.split('/');
-            numVal = parseFloat(parts[0]) / parseFloat(parts[1]);
-          }
-          return Math.abs(numVal - 0.5) < 0.01 ? true : "רצוי (6) חלקי מצוי (12) = 1/2.";
-        },
-        successMessage: "מעולה. מאחר והריבית השנתית הנתונה היא האמיתית (אפקטיבית), אנחנו פשוט מושכים אותה אחורה לחצי שנה בעזרת חזקת 1/2."
-      },
-      {
-        id: 'final',
-        title: 'שלב 2: הריבית לסדרה (Rate)',
-        prompt: 'חשב את הריבית האפקטיבית (באחוזים, 2 ספרות עשרוניות).',
-        hint: '1.10 בחזקת 0.5, פחות 1.',
-        correctAnswer: 4.88,
-        solutionJSX: <BeautifulMath>Rate = (1 + 0.10)<sup>1/2</sup> - 1 = 4.88%</BeautifulMath>,
-        validate: (val) => Math.abs(val - 4.88) <= 0.1 ? true : "1.10 בחזקת 0.5, פחות 1. כפול 100.",
-        successMessage: "מה למדנו כאן? כאשר הריבית כבר אפקטיבית, ממירים רק עם מעריך חזקה מתאים!"
-      }
-    ]
-  },
-  {
-    type: 'exercise',
-    title: 'תרגיל 4.2: רמה בינונית - המרה מאפקטיבית לאפקטיבית (m>1)',
-    hasExcelSim: true,
-    formulaInfo: {
-      formulaJSX: <BeautifulMath><i className="mr-1">r<sub>e</sub></i> = (1 + <i className="mx-1">r</i>)<sup><i className="ml-1">m</i></sup> - 1</BeautifulMath>,
-      params: []
-    },
-    question: 'יואב משלם 1,500 ש"ח בתום כל רבעון (3 חודשים) במשך שנתיים. נתון כי הריבית האפקטיבית לחודש היא 2%. \n\nמהי הריבית (Rate) באקסל?',
-    params: [
-      { label: 'תדירות תשלום (הרצוי!)', value: '3 חודשים' },
-      { label: 'ריבית נתונה', value: '2% (אפקטיבית!)' },
-      { label: 'תקופה נתונה (המצוי)', value: '1 חודש' }
-    ],
-    steps: [
-      {
-        id: 'm',
-        title: 'שלב 1: מציאת m',
-        prompt: 'שוב, הריבית אפקטיבית, אז רק חזקה! רצוי (תשלום) חלקי מצוי (תקופת הנתון). מהו m?',
-        hint: 'רצוי 3, מצוי 1. התשובה היא 3.',
-        correctAnswer: 3,
-        solutionJSX: <BeautifulMath><i className="mr-1">m</i> = <Fraction num="3" den="1" /> = 3</BeautifulMath>,
-        validate: (val) => val === 3 ? true : "רצוי (3) חלקי מצוי (1) = 3.",
-        successMessage: "נכון. הפעם אנחנו מעלים ריבית של תקופה קצרה (חודש) לתקופה ארוכה יותר (רבעון)."
-      },
-      {
-        id: 'final',
-        title: 'שלב 2: הריבית לסדרה (Rate)',
-        prompt: 'מכיוון שהריבית כבר אפקטיבית, אין לנו R/n! אנחנו מיד קופצים לחזקה (באחוזים, 2 ספרות עשרוניות).',
-        hint: '1.02 בחזקת 3, פחות 1.',
-        correctAnswer: 6.12,
-        solutionJSX: <BeautifulMath>Rate = (1 + 0.02)<sup>3</sup> - 1 = 6.12%</BeautifulMath>,
-        validate: (val) => Math.abs(val - 6.12) <= 0.1 ? true : "1.02 בחזקת 3, פחות 1.",
-        successMessage: "מצוין. דוגמה יפה למעריך שגדול מ-1. עכשיו הזינו נתונים לאקסל למטה (שימו לב כמה תשלומים סך הכל יש בשנתיים רבעוניות? 8 תשלומים)."
-      }
-    ]
-  },
-  {
-    type: 'exercise',
-    title: 'תרגיל 4.3: רמה גבוהה - מנקובה לאפקטיבית בתוך סדרה',
-    hasExcelSim: true,
-    formulaInfo: {
-      formulaJSX: <BeautifulMath>Rate = (1 + <Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} />)<sup><i className="ml-1">m</i></sup> - 1</BeautifulMath>,
-      params: []
-    },
-    question: 'חברת ביטוח מציעה לקבל 5,000 ש"ח בתום כל רבעון (3 חודשים) במשך 4 שנים. הריבית הנקובה השנתית היא 12%, מחושבת כל חודש! \n\nמהו ה-Rate (הריבית לרבעון)?',
-    params: [
-      { label: 'תדירות תשלום (הרצוי!)', value: '3 חודשים (רבעון)' },
-      { label: 'ריבית נקובה', value: '12% לשנה' },
-      { label: 'תדירות חישוב (מצוי)', value: '1 חודש' }
-    ],
-    steps: [
-      {
-        id: 'rn',
-        title: 'שלב 1: מציאת n והריבית התקופתית',
-        prompt: 'הריבית *נקובה*. קודם נפרק אותה. כמה פעמים חישוב (חודש) נכנס בנקובה (שנה)? נכון, 12. אז מהי הריבית לחודש (R/n)?',
-        hint: '12% לשנה מחושבת כל חודש. 12/12.',
-        correctAnswer: 1,
-        solutionJSX: <BeautifulMath><Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} /> = <Fraction num="12%" den="12" /> = 1%</BeautifulMath>,
-        validate: (val) => val === 1 ? true : "12 חלקי 12.",
-        successMessage: "ריבית הבסיס (המצויה) היא 1% לחודש."
-      },
-      {
-        id: 'm',
-        title: 'שלב 2: מעריך החזקה (m)',
-        prompt: 'רצוי (תדירות התשלום) חלקי מצוי (תדירות החישוב). מהו m?',
-        hint: 'תשלום כל 3 חודשים. חישוב כל 1 חודש. 3 חלקי 1.',
-        correctAnswer: 3,
-        solutionJSX: <BeautifulMath><i className="mr-1">m</i> = <Fraction num="3" den="1" /> = 3</BeautifulMath>,
-        validate: (val) => val === 3 ? true : "רצוי 3, מצוי 1. התשובה 3.",
-        successMessage: "נכון. נפעיל דריבית 3 פעמים."
-      },
-      {
-        id: 'final',
-        title: 'שלב 3: הריבית לסדרה (Rate)',
-        prompt: 'חשב את הריבית שתזין לאקסל (2 ספרות עשרוניות).',
-        hint: '1.01 בחזקת 3, פחות 1.',
-        correctAnswer: 3.03,
-        solutionJSX: <BeautifulMath>Rate = (1 + 0.01)<sup>3</sup> - 1 = 3.03%</BeautifulMath>,
-        validate: (val) => Math.abs(val - 3.03) <= 0.1 ? true : "1.01 בחזקת 3.",
-        successMessage: "מה למדנו כאן? כאשר הריבית נקובה, אנו מבצעים המרה מלאה (עם חלוקה ב-n ואז חזקה ב-m) כדי להתאים את הריבית לתדירות התשלום בסדרה!"
-      }
-    ]
-  },
-  {
-    type: 'theory',
-    title: 'פרק 5: עסקאות בתשלום אחד (תזרים ישיר)',
-    icon: <Coins className="text-emerald-500" size={32} />,
-    content: (
-      <div className="space-y-4 text-slate-700 leading-relaxed text-lg">
-        <p>
-          כשיש לנו הלוואה או השקעה שנפתחת היום (P0) ונפרעת במכה אחת בסוף (Pt), ואין תשלומים באמצע (סדרה), אין צורך להסתבך עם הנוסחאות המורכבות לעיל. אנו יכולים פשוט לחשב את <strong>הצמיחה הישירה</strong> של הכסף.
-        </p>
-        <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-200">
-          <BeautifulMath>
-            <i className="mr-1">r<sub>e</sub></i> = <Fraction num={<>|<i className="mx-1">P<sub>t</sub></i>|</>} den={<>|<i className="mx-1">P<sub>0</sub></i>|</>} /> - 1
-          </BeautifulMath>
-          <ul className="mt-4 space-y-2 text-emerald-900 list-disc list-inside">
-            <li><strong className="text-emerald-950">למה ערך מוחלט?</strong> כדי להתעלם מהסימנים של פלוס ומינוס, ולהתמקד בגודל היחסי (כמה החזרתי חלקי כמה קיבלתי).</li>
-            <li><strong>חשוב מאוד:</strong> נוסחה זו תמיד נותנת את הריבית האפקטיבית ל<strong>כל תקופת העסקה שבין שני התשלומים</strong> (גם אם היא 5 שנים). אם מבקשים מאיתנו להמיר את זה לריבית שנתית, נצטרך להשתמש בנוסחת ההמרה (חזקה בלבד) שלמדנו.</li>
-          </ul>
-        </div>
-      </div>
-    )
-  },
-  {
-    type: 'exercise',
-    title: 'תרגיל 5.1: חישוב תזרים ישיר קלאסי',
-    formulaInfo: {
-      formulaJSX: <BeautifulMath><i className="mr-1">r<sub>e</sub></i> = <Fraction num={<>|<i className="mx-1">P<sub>t</sub></i>|</>} den={<>|<i className="mx-1">P<sub>0</sub></i>|</>} /> - 1</BeautifulMath>,
-      params: []
-    },
-    question: 'נטלת הלוואה של 40,000 ש"ח היום. בעוד שנתיים וחצי החזרת לבנק סכום של 52,000 ש"ח (הכולל קרן וריבית). מהי הריבית האפקטיבית ששילמת לתקופה זו של שנתיים וחצי?',
-    params: [
-      { label: 'תזרים ביום אפס (P0)', value: '40,000' },
-      { label: 'תזרים סופי (Pt)', value: '-52,000' }
-    ],
-    steps: [
-      {
-        id: 'calc',
-        title: 'חישוב הריבית לכל העסקה',
-        prompt: 'הצב בנוסחת הערכים המוחלטים (באחוזים).',
-        hint: '52000 חלקי 40000. מהתוצאה הורד 1 והכפל ב-100.',
-        correctAnswer: 30,
-        solutionJSX: <BeautifulMath>r<sub>2.5y</sub> = <Fraction num="52000" den="40000" /> - 1 = 30%</BeautifulMath>,
-        validate: (val) => {
-          if (Math.abs(val - 30) <= 0.1) return true;
-          if (val === 1.3) return "היחס הוא 1.3, אל תשכח להוריד 1 (כדי להשאר רק עם הריבית) ולהכפיל ב-100.";
-          return "נסה שוב: 52 אלף לחלק ל-40 אלף, פחות 1.";
-        },
-        successMessage: "הבנת מצוין. שיטת התזרים הישיר היא המהירה והבטוחה ביותר לעסקאות פשוטות של תשלום בודד."
-      }
-    ]
-  },
-  {
-    type: 'exercise',
-    title: 'תרגיל 5.2: תזרים ישיר + התאמה שנתית (רמת בחינה)',
-    formulaInfo: {
-      formulaJSX: (
-        <div className="flex flex-col items-center">
-          <BeautifulMath>1. &nbsp;&nbsp; r<sub>total</sub> = <Fraction num={<>|<i className="mx-1">P<sub>t</sub></i>|</>} den={<>|<i className="mx-1">P<sub>0</sub></i>|</>} /> - 1</BeautifulMath>
-          <div className="my-1"></div>
-          <BeautifulMath>2. &nbsp;&nbsp; r<sub>annual</sub> = (1 + r<sub>total</sub>)<sup>m</sup> - 1</BeautifulMath>
-        </div>
-      ),
-      params: []
-    },
-    question: 'חברת פלוס הפקידה 100,000 ש"ח בחיסכון, וקיבלה לאחר שנתיים סכום של 121,000 ש"ח. \n\nמהי הריבית האפקטיבית השנתית בעסקה זו?',
-    params: [
-      { label: 'הפקדה (P0)', value: '-100,000' },
-      { label: 'תקבול לאחר שנתיים (Pt)', value: '+121,000' }
-    ],
-    steps: [
-      {
-        id: 'total',
-        title: 'שלב 1: הריבית לכל התקופה (שנתיים)',
-        prompt: 'חשבו בעזרת התזרים הישיר את הריבית האפקטיבית לשנתיים כולה.',
-        hint: '121000 חלקי 100000, פחות 1.',
-        correctAnswer: 21,
-        solutionJSX: <BeautifulMath>r<sub>2y</sub> = <Fraction num="121000" den="100000" /> - 1 = 21%</BeautifulMath>,
-        validate: (val) => Math.abs(val - 21) <= 0.1 ? true : "חלוקה פשוטה.",
-        successMessage: "מעולה. מצאנו שהכסף צמח ב-21% על פני שנתיים. זוהי ריבית אפקטיבית מלאה, אך היא לשנתיים."
-      },
-      {
-        id: 'annual',
-        title: 'שלב 2: המרה לריבית שנתית (מאפקטיבית לאפקטיבית)',
-        prompt: 'כעת עלינו להמיר את ה-21% (שהיא לשנתיים) לריבית של שנה 1. רצוי (1) חלקי מצוי (2). חשבו את הריבית השנתית (2 ספרות עשרוניות).',
-        hint: '1.21 בחזקת 1/2 (או 0.5), פחות 1.',
-        correctAnswer: 10,
-        solutionJSX: <BeautifulMath>r<sub>1y</sub> = (1 + 0.21)<sup>1/2</sup> - 1 = 10%</BeautifulMath>,
-        validate: (val) => Math.abs(val - 10) <= 0.1 ? true : "1.21 בחזקת 0.5, פחות 1.",
-        successMessage: "מושלם! זהו תהליך שלם: חילוץ ריבית מתוך תזרים יחיד, ואז המרתה (באמצעות חזקה בלבד) לכל פרק זמן שמבקשים מאיתנו."
-      }
-    ]
-  }
-];
-
-// --- Sub-components ---
-
-const FormulaBox = ({ info }) => {
-  if (!info) return null;
-  return (
-    <div className="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-5 mb-6 shadow-sm">
-      <h4 className="font-bold text-indigo-900 mb-3 flex items-center gap-2 text-lg">
-        <Lightbulb size={24} className="text-amber-500" />
-        תזכורת: נוסחאות מיישמות
-      </h4>
-      <div className="mb-4 text-center">
-        {info.formulaJSX}
-      </div>
-      {info.params && info.params.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-indigo-800 border-t border-indigo-200/50 pt-4 mt-2">
-          {info.params.map((param, idx) => (
-            <div key={idx} className="flex items-start gap-2 bg-indigo-100/50 p-2.5 rounded border border-indigo-100">
-              <span className="font-mono font-bold bg-indigo-200 px-1.5 py-0.5 rounded text-indigo-900 block min-w-max" dir="ltr">{param.name}</span>
-              <span className="leading-snug">{param.desc}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const StepBox = ({ step, index, isActive, isCompleted, isSkipped, onComplete }) => {
-  const [inputVal, setInputVal] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [showHint, setShowHint] = useState(false);
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    if (isActive && inputRef.current && !isCompleted) {
-      setTimeout(() => inputRef.current.focus(), 100);
-    }
-  }, [isActive, isCompleted]);
-
-  const parseInput = (str) => {
-    const cleanStr = str.replace(/,/g, '');
-    if (cleanStr.includes('/')) {
-      const parts = cleanStr.split('/');
-      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-        return parseFloat(parts[0]) / parseFloat(parts[1]);
-      }
-    }
-    return parseFloat(cleanStr);
-  };
-
-  const handleCheck = () => {
-    if (!inputVal.trim()) return;
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>המאסטר בריבית אפקטיבית</title>
     
-    const parsed = parseInput(inputVal);
-    const valToTest = inputVal.includes('/') ? inputVal : parsed;
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    const validationResult = step.validate(valToTest);
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    if (validationResult === true) {
-      setErrorMsg('');
-      onComplete(false); // Not skipped
-    } else {
-      setErrorMsg(validationResult);
-      setShowHint(true); 
-    }
-  };
-
-  const handleSkip = () => {
-    let ans = step.correctAnswer;
-    if (Math.abs(ans - (1/3)) < 0.01) ans = "1/3";
-    else if (Math.abs(ans - 0.5) < 0.01) ans = "1/2";
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;900&display=swap" rel="stylesheet">
     
-    setInputVal(ans.toString());
-    setErrorMsg('');
-    onComplete(true); // Skipped
-  };
-
-  if (!isActive && !isCompleted) return null;
-
-  return (
-    <div className={`border-2 rounded-xl p-5 mb-5 transition-all duration-500 shadow-md
-      ${isSkipped ? 'border-amber-300 bg-amber-50' : 
-        isCompleted ? 'border-emerald-300 bg-emerald-50' : 'border-blue-400 bg-white'}`}>
-      
-      <div className="flex justify-between items-center mb-4">
-        <h3 className={`font-bold text-lg flex items-center gap-3 
-          ${isSkipped ? 'text-amber-800' : isCompleted ? 'text-emerald-800' : 'text-blue-800'}`}>
-          <span className={`flex items-center justify-center w-8 h-8 rounded-full text-white shadow-sm font-black
-            ${isSkipped ? 'bg-amber-500' : isCompleted ? 'bg-emerald-500' : 'bg-blue-600'}`}>
-            {index + 1}
-          </span>
-          {step.title}
-        </h3>
-        {isSkipped ? <FastForward className="text-amber-500" size={28} /> : 
-         isCompleted ? <CheckCircle2 className="text-emerald-500" size={28} /> : null}
-      </div>
-      
-      <p className="text-slate-800 mb-4 font-medium text-lg leading-relaxed">{step.prompt}</p>
-
-      {isCompleted ? (
-        <div className="space-y-4 animate-fade-in">
-          <div className={`p-4 rounded-xl border flex flex-col items-center shadow-sm ${isSkipped ? 'bg-white border-amber-200' : 'bg-white border-emerald-100'}`}>
-            <span className={`font-bold mb-2 ${isSkipped ? 'text-amber-700' : 'text-emerald-700'}`}>
-              {isSkipped ? 'פתרון מתמטי (דולג):' : 'פתרון מתמטי מלא:'}
-            </span>
-            {step.solutionJSX ? (
-              <div className="scale-110 mt-2">{step.solutionJSX}</div>
-            ) : (
-              <BeautifulMath inline>{inputVal}</BeautifulMath>
-            )}
-          </div>
-          
-          {step.successMessage && !isSkipped && (
-            <div className="bg-emerald-100/50 border border-emerald-200 p-4 rounded-xl flex items-start gap-3 shadow-sm">
-              <GraduationCap className="text-emerald-600 shrink-0 mt-1" size={24} />
-              <div>
-                <strong className="block text-emerald-800 mb-1">הסבר והרחבה:</strong>
-                <p className="text-emerald-900 leading-snug font-medium">{step.successMessage}</p>
-              </div>
-            </div>
-          )}
-
-          {isSkipped && (
-            <div className="bg-amber-100/50 border border-amber-200 p-3 rounded-xl flex items-center gap-2">
-              <Info className="text-amber-600" size={20} />
-              <span className="text-amber-800 text-sm">בחרת לראות את התשובה ולדלג על שלב זה. אפשר להמשיך הלאה.</span>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <input 
-              ref={inputRef}
-              dir="ltr"
-              type="text" 
-              value={inputVal}
-              onChange={(e) => setInputVal(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleCheck()}
-              placeholder="הזן ערך..."
-              className="border-2 border-slate-300 rounded-xl px-4 py-3 w-full sm:max-w-[180px] text-center text-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all font-mono shadow-inner bg-slate-50"
-            />
-            <button 
-              onClick={handleCheck}
-              className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md hover:shadow-lg w-full sm:w-auto"
-            >
-              בדוק תשובה
-            </button>
-            
-            <div className="flex gap-2 w-full sm:w-auto">
-              <button 
-                onClick={() => setShowHint(!showHint)}
-                className={`flex-1 sm:flex-none py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 border-2 ${showHint ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600'}`}
-                title="בקש רמז מכוון"
-              >
-                <Lightbulb size={20} className={showHint ? "text-amber-500" : "text-slate-400"} />
-                <span className="sm:hidden font-bold">רמז</span>
-              </button>
-              
-              <button 
-                onClick={handleSkip}
-                className="flex-1 sm:flex-none py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 border-2 bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-600"
-                title="התעייפתי - גלה לי את התשובה"
-              >
-                <FastForward size={20} />
-                <span className="sm:hidden font-bold">התעייפתי</span>
-              </button>
-            </div>
-          </div>
-
-          {errorMsg && (
-            <div className="bg-red-50 text-red-800 p-4 rounded-xl flex items-start gap-3 border-2 border-red-200 animate-pulse">
-              <AlertTriangle className="shrink-0 mt-0.5 text-red-500" size={24} />
-              <div>
-                <strong className="block mb-1 text-red-900">זיהוי שגיאה:</strong>
-                <p className="text-base leading-snug">{errorMsg}</p>
-              </div>
-            </div>
-          )}
-
-          {showHint && (
-            <div className="bg-amber-50 text-amber-900 p-4 rounded-xl flex items-start gap-3 border-2 border-amber-200 shadow-sm animate-fade-in">
-              <Lightbulb className="shrink-0 mt-0.5 text-amber-500" size={24} />
-              <div>
-                <strong className="block mb-1">רמז מחשבתי:</strong>
-                <p className="text-base leading-snug">{step.hint}</p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const ExerciseScreen = ({ content, onFinish }) => {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState([]);
-
-  const handleStepComplete = (isSkipped) => {
-    const newCompleted = [...completedSteps];
-    newCompleted[currentStepIndex] = { isSkipped };
-    setCompletedSteps(newCompleted);
-
-    if (currentStepIndex < content.steps.length - 1) {
-      setCurrentStepIndex(prev => prev + 1);
-    }
-  };
-
-  const isFullyCompleted = completedSteps.length === content.steps.length;
-
-  return (
-    <div className="animate-fade-in relative">
-      {isFullyCompleted && <Confetti />}
-      <FormulaBox info={content.formulaInfo} />
-
-      <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-6 mb-8 shadow-sm">
-        <h2 className="text-xl font-bold text-slate-800 mb-6 leading-relaxed whitespace-pre-line">{content.question}</h2>
-        
-        {/* Dynamic Parameters Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-slate-600">
-          {content.params.map((param, idx) => (
-             <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-               <span className="block font-bold text-slate-700 mb-2 leading-tight">{param.label}</span>
-               <span className="text-blue-800 font-bold bg-blue-50 px-2 py-1.5 rounded self-start border border-blue-100" dir="ltr">{param.value}</span>
-             </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        {content.steps.map((step, index) => {
-          const isCompleted = index < completedSteps.length;
-          const isSkipped = isCompleted ? completedSteps[index].isSkipped : false;
-          
-          return (
-            <StepBox 
-              key={step.id}
-              step={step}
-              index={index}
-              isActive={index === currentStepIndex}
-              isCompleted={isCompleted}
-              isSkipped={isSkipped}
-              onComplete={handleStepComplete}
-            />
-          );
-        })}
-      </div>
-
-      {isFullyCompleted && content.autoCalculate && content.summaryCalc && (
-        <div className="mt-6 bg-blue-50 border-2 border-blue-200 p-6 rounded-2xl shadow-sm animate-fade-in relative z-10">
-          <h3 className="font-bold text-blue-900 text-xl mb-3 flex items-center gap-2">
-            <Calculator size={24} />
-            חישוב אוטומטי מסכם
-          </h3>
-          <p className="text-blue-800 mb-4 font-medium">{content.summaryCalc.explanation}</p>
-          <div className="scale-110 flex justify-center">
-             {content.summaryCalc.formulaJSX}
-          </div>
-        </div>
-      )}
-
-      {isFullyCompleted && content.hasExcelSim && (
-        <div className="animate-fade-in relative z-10">
-          <ExcelSimulator defaultRate={content.steps[content.steps.length-1].correctAnswer} />
-        </div>
-      )}
-
-      {isFullyCompleted && (
-        <div className="mt-10 text-center animate-bounce-short relative z-10">
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-900 px-8 py-4 rounded-full font-bold text-xl mb-8 border-2 border-emerald-300 shadow-md">
-            <CheckCircle2 size={28} className="text-emerald-600" />
-            מצוין! סיימת את כל השלבים לתרגיל זה בהצלחה.
-          </div>
-          <div>
-            <button 
-              onClick={onFinish}
-              className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-white font-bold py-4 px-10 rounded-2xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center gap-3 mx-auto text-lg"
-            >
-              עבור לתרגול הבא, כל הכבוד!
-              <ChevronLeft size={24} />
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-
-// --- Main App Component ---
-export default function App() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  // Scroll to top on index change
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentIndex]);
-
-  const currentContent = courseContent[currentIndex];
-  const progressPercentage = ((currentIndex + 1) / courseContent.length) * 100;
-
-  const handleNext = () => {
-    if (currentIndex < courseContent.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-    }
-  };
-
-  return (
-    <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900 font-sans pb-16">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white py-8 px-4 shadow-lg sticky top-0 z-20">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-5">
-            <div className="bg-white/10 p-4 rounded-2xl shadow-inner border border-white/20">
-              <Calculator size={36} className="text-blue-100" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-extrabold tracking-tight">המאסטר בריבית אפקטיבית</h1>
-              <p className="text-blue-200 text-base mt-2 font-medium opacity-90">קורס אקדמי משולב: תיאוריה, תרגול וסימולטורים</p>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-4xl mx-auto mt-8 px-4">
-        {/* Progress Bar */}
-        <div className="mb-10 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
-          <div className="flex justify-between text-base text-slate-600 font-bold mb-3 px-2 relative z-10">
-            <span>שלב {currentIndex + 1} מתוך {courseContent.length}</span>
-            <span className="text-indigo-600">{Math.round(progressPercentage)}% הושלמו</span>
-          </div>
-          <div className="w-full bg-slate-100 rounded-full h-4 overflow-hidden relative z-10 shadow-inner">
-            <div 
-              className="bg-gradient-to-l from-indigo-500 via-blue-500 to-cyan-500 h-4 rounded-full transition-all duration-700 ease-out" 
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
-        </div>
-
-        {/* Content Card */}
-        <div className="bg-white rounded-3xl shadow-xl p-6 md:p-12 border border-slate-100 relative overflow-hidden">
-          {/* Decorative background element */}
-          <div className="absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full opacity-60 pointer-events-none"></div>
-          
-          <div className="flex items-center gap-5 mb-10 pb-6 border-b-2 border-slate-100 relative">
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 shadow-sm">
-              {currentContent.icon || <BookOpen className="text-blue-500" size={32} />}
-            </div>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight leading-snug">{currentContent.title}</h2>
-          </div>
-
-          <div className="min-h-[400px]">
-            {currentContent.type === 'theory' ? (
-              <div className="animate-fade-in relative z-10">
-                {currentContent.content}
-                <div className="mt-14 text-left border-t border-slate-100 pt-8">
-                  <button 
-                    onClick={handleNext}
-                    className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-4 px-10 rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 inline-flex items-center gap-3 text-lg"
-                  >
-                    הבנתי הכל, בואו נתקדם!
-                    <ChevronLeft size={24} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <ExerciseScreen 
-                key={`ex-${currentIndex}`} // Force re-mount on change
-                content={currentContent} 
-                onFinish={handleNext} 
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Bottom Navigation */}
-        <div className="flex justify-between items-center mt-10 px-4">
-          <button 
-            onClick={handlePrev}
-            disabled={currentIndex === 0}
-            className={`flex items-center gap-3 font-bold py-3 px-6 rounded-xl transition-all ${
-              currentIndex === 0 
-                ? 'text-slate-300 cursor-not-allowed' 
-                : 'text-indigo-600 bg-white hover:bg-indigo-50 shadow-sm border border-slate-200'
-            }`}
-          >
-            <ChevronRight size={20} />
-            חזור לפרק הקודם
-          </button>
-          
-          {currentIndex === courseContent.length - 1 && currentContent.type !== 'exercise' && (
-             <div className="text-emerald-700 font-bold flex items-center gap-2 bg-emerald-100 px-6 py-3 rounded-xl border border-emerald-200 shadow-sm text-lg">
-               <CheckCircle2 size={24} /> סיימת את קורס המאסטר בהצלחה!
-             </div>
-          )}
-        </div>
-      </main>
-
-      {/* Global styles injected via style tag */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;900&display=swap');
-        
-        body {
-          font-family: 'Heebo', sans-serif;
-        }
-
+    <style>
+        body { font-family: 'Heebo', sans-serif; }
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in {
-          animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         @keyframes bounceShort {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
         .animate-bounce-short {
-          animation: bounceShort 0.7s ease-in-out;
+            animation: bounceShort 0.7s ease-in-out;
         }
-
-        /* Confetti Animation */
         @keyframes confettiFall {
-          0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
-          100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
         .animate-confetti {
-          animation: confettiFall linear forwards;
+            animation: confettiFall linear forwards;
         }
-      `}} />
-    </div>
-  );
-}
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 font-sans pb-16">
+    <div id="root"></div>
+
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel (Translates JSX in the browser) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Application Code -->
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Icons Replacements (using FontAwesome) ---
+        const ChevronLeft = ({size, className}) => <i className={`fa-solid fa-chevron-left ${className||''}`} style={{fontSize: size}}></i>;
+        const ChevronRight = ({size, className}) => <i className={`fa-solid fa-chevron-right ${className||''}`} style={{fontSize: size}}></i>;
+        const CheckCircle2 = ({size, className}) => <i className={`fa-solid fa-circle-check ${className||''}`} style={{fontSize: size}}></i>;
+        const XCircle = ({size, className}) => <i className={`fa-solid fa-circle-xmark ${className||''}`} style={{fontSize: size}}></i>;
+        const Lightbulb = ({size, className}) => <i className={`fa-solid fa-lightbulb ${className||''}`} style={{fontSize: size}}></i>;
+        const BookOpen = ({size, className}) => <i className={`fa-solid fa-book-open ${className||''}`} style={{fontSize: size}}></i>;
+        const Calculator = ({size, className}) => <i className={`fa-solid fa-calculator ${className||''}`} style={{fontSize: size}}></i>;
+        const Info = ({size, className}) => <i className={`fa-solid fa-circle-info ${className||''}`} style={{fontSize: size}}></i>;
+        const Target = ({size, className}) => <i className={`fa-solid fa-bullseye ${className||''}`} style={{fontSize: size}}></i>;
+        const Coins = ({size, className}) => <i className={`fa-solid fa-coins ${className||''}`} style={{fontSize: size}}></i>;
+        const TrendingUp = ({size, className}) => <i className={`fa-solid fa-arrow-trend-up ${className||''}`} style={{fontSize: size}}></i>;
+        const AlertTriangle = ({size, className}) => <i className={`fa-solid fa-triangle-exclamation ${className||''}`} style={{fontSize: size}}></i>;
+        const FastForward = ({size, className}) => <i className={`fa-solid fa-forward-fast ${className||''}`} style={{fontSize: size}}></i>;
+        const GraduationCap = ({size, className}) => <i className={`fa-solid fa-graduation-cap ${className||''}`} style={{fontSize: size}}></i>;
+        const TableIcon = ({size, className}) => <i className={`fa-solid fa-table ${className||''}`} style={{fontSize: size}}></i>;
+
+        // --- Confetti Effect Component ---
+        const Confetti = () => {
+          const [isVisible, setIsVisible] = useState(true);
+          useEffect(() => {
+            const timer = setTimeout(() => setIsVisible(false), 4000);
+            return () => clearTimeout(timer);
+          }, []);
+
+          if (!isVisible) return null;
+          const colors = ['#fce18a', '#ff726d', '#b48def', '#f4306d', '#42e2b8', '#3b82f6', '#10b981'];
+          
+          return (
+            <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+              {[...Array(60)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute animate-confetti rounded-sm"
+                  style={{
+                    left: `${Math.random() * 100}vw`,
+                    top: `-20px`,
+                    width: `${Math.random() * 12 + 6}px`,
+                    height: `${Math.random() * 12 + 6}px`,
+                    backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+                    animationDelay: `${Math.random() * 2}s`,
+                    animationDuration: `${Math.random() * 2 + 2}s`,
+                  }}
+                />
+              ))}
+            </div>
+          );
+        };
+
+        // --- Beautiful Math Components ---
+        const BeautifulMath = ({ children, inline = false }) => {
+          const Tag = inline ? 'span' : 'div';
+          return (
+            <Tag 
+              dir="ltr" 
+              className={`tracking-wide text-slate-800 ${inline ? 'inline-flex items-center mx-1 font-semibold text-[1.1em]' : 'flex items-center justify-center my-3 text-xl bg-white shadow-sm px-4 py-3 rounded-lg border border-slate-200'}`}
+              style={{ fontFamily: '"Cambria Math", "Times New Roman", "Nina", serif', fontStyle: 'italic' }}
+            >
+              {children}
+            </Tag>
+          );
+        };
+
+        const Fraction = ({ num, den }) => (
+          <span className="inline-flex flex-col items-center justify-center align-middle mx-1 font-serif text-[0.95em]">
+            <span className="border-b-[1.5px] border-slate-800 px-1 w-full text-center leading-tight pb-[1px]">{num}</span>
+            <span className="px-1 w-full text-center leading-tight pt-[1px]">{den}</span>
+          </span>
+        );
+
+        const MathText = ({ children }) => (
+          <span style={{ fontStyle: 'normal', fontFamily: 'sans-serif' }} className="px-1 text-[0.9em]">
+            {children}
+          </span>
+        );
+
+        // --- Excel Simulator Component ---
+        const ExcelSimulator = ({ defaultRate = "" }) => {
+          const [rate, setRate] = useState(defaultRate);
+          const [nper, setNper] = useState("");
+          const [pmt, setPmt] = useState("");
+          const [pv, setPv] = useState("0");
+          const [fv, setFv] = useState("0");
+          const [result, setResult] = useState(null);
+          const [calcType, setCalcType] = useState('FV');
+
+          const calculate = () => {
+            const r = parseFloat(rate) / 100;
+            const n = parseFloat(nper);
+            const p = parseFloat(pmt);
+            const p_v = parseFloat(pv);
+            const f_v = parseFloat(fv);
+
+            if (isNaN(r) || isNaN(n) || isNaN(p)) {
+              setResult("חסרים נתונים (Rate, Nper, Pmt)");
+              return;
+            }
+
+            if (calcType === 'FV') {
+              let calcFV = 0;
+              if (r === 0) {
+                calcFV = -(p_v + p * n);
+              } else {
+                calcFV = -(p_v * Math.pow(1 + r, n) + p * (Math.pow(1 + r, n) - 1) / r);
+              }
+              setResult(`FV = ${calcFV.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
+            } else {
+              let calcPV = 0;
+              if (r === 0) {
+                calcPV = -(p * n + f_v);
+              } else {
+                calcPV = -(p * (1 - Math.pow(1 + r, -n)) / r + f_v * Math.pow(1 + r, -n));
+              }
+              setResult(`PV = ${calcPV.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
+            }
+          };
+
+          return (
+            <div className="bg-[#107c41]/5 p-6 rounded-2xl border-2 border-[#107c41]/20 mt-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-4 text-[#107c41]">
+                <TableIcon size={24} />
+                <h4 className="font-bold text-xl">סימולטור פונקציות אקסל</h4>
+              </div>
+              <p className="text-sm text-slate-600 mb-4 font-medium">הזן את הריבית האפקטיבית (Rate) שחישבת למעלה! שים לב לסימנים (השקעה = מינוס, תקבול = פלוס).</p>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+                <div>
+                  <label className="block text-xs font-bold mb-1">Rate (%)</label>
+                  <input type="number" step="any" value={rate} onChange={e=>setRate(e.target.value)} className="w-full p-2 border rounded font-mono text-left bg-white border-[#107c41]/30 focus:ring-2 focus:ring-[#107c41] outline-none" dir="ltr" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold mb-1">Nper</label>
+                  <input type="number" step="any" value={nper} onChange={e=>setNper(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold mb-1">Pmt</label>
+                  <input type="number" step="any" value={pmt} onChange={e=>setPmt(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold mb-1">PV</label>
+                  <input type="number" step="any" value={pv} onChange={e=>setPv(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold mb-1">FV</label>
+                  <input type="number" step="any" value={fv} onChange={e=>setFv(e.target.value)} className="w-full p-2 border rounded font-mono text-left outline-none focus:ring-2 focus:ring-[#107c41]" dir="ltr" />
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 border-t border-[#107c41]/20 pt-4">
+                <button onClick={() => { setCalcType('FV'); setTimeout(calculate, 50); }} className="bg-[#107c41] hover:bg-[#0c5a2f] text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-md">
+                  חשב FV
+                </button>
+                <button onClick={() => { setCalcType('PV'); setTimeout(calculate, 50); }} className="bg-white border-2 border-[#107c41] text-[#107c41] hover:bg-[#107c41]/10 font-bold py-2 px-6 rounded-lg transition-colors shadow-sm">
+                  חשב PV
+                </button>
+                
+                {result && (
+                  <div className="mr-auto bg-white px-4 py-2 rounded-lg border-2 border-[#107c41] font-mono font-bold text-lg text-[#107c41] shadow-sm animate-fade-in" dir="ltr">
+                    {result}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        };
+
+        // --- Content Data ---
+        const courseContent = [
+          {
+            type: 'theory',
+            title: 'פרק 1: למה אנחנו בכלל צריכים "ריבית אפקטיבית"?',
+            icon: <BookOpen className="text-blue-500" size={32} />,
+            content: (
+              <div className="space-y-5 text-slate-700 leading-relaxed text-lg">
+                <p>
+                  תארו לכם שאתם לוקחים הלוואה, והבנק אומר לכם: <strong className="text-blue-600">"הריבית היא 8% בשנה"</strong>. נשמע פשוט, נכון?
+                  אבל בפועל, בסוף השנה אתם מגלים ששילמתם 8.24% ואפילו יותר. איך זה קרה? 
+                </p>
+                <p>
+                  התשובה היא ש<strong>הריבית הנקובה</strong> (זו שרשומה בחוזה) היא רק נקודת ההתחלה. באותיות הקטנות של החוזה מסתתרים גורמים שמשנים את התמונה ומייצרים את מה שאנו קוראים לו <strong>הריבית האפקטיבית</strong> (הריבית "האמיתית" בפועל).
+                </p>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 shadow-sm mt-4">
+                  <h4 className="font-bold text-indigo-900 mb-4 flex items-center gap-2 text-xl border-b border-indigo-200 pb-2">
+                    <Info size={24} className="text-indigo-600" />
+                    4 המרכיבים שמשפיעים על הריבית האמיתית:
+                  </h4>
+                  <ol className="list-decimal list-inside space-y-4 text-indigo-950 pr-2">
+                    <li><strong className="text-indigo-800">ריבית חוזית / נקובה:</strong> הריבית "היבשה" שמופיעה בחוזה. זו הריבית לפני שאר ההשפעות.</li>
+                    <li><strong className="text-indigo-800">ריבית דריבית:</strong> כשהבנק מחשב את הריבית מספר פעמים לאורך התקופה, הריבית מתווספת לקרן ("צוברת ריבית"), מה שמגדיל את העלות הכוללת.</li>
+                    <li><strong className="text-indigo-800">ריבית מראש:</strong> מצבים בהם הבנק מנכה עמלות או ריבית מראש מסכום ההלוואה. אתם מקבלים פחות כסף ביד, ולכן באחוזים שילמתם יותר.</li>
+                    <li><strong className="text-indigo-800">עמלות ו"אותיות קטנות":</strong> עמלות פתיחת תיק, דמי ניהול וכו', שמתפקדות כעלות מימון לכל דבר.</li>
+                  </ol>
+                </div>
+              </div>
+            )
+          },
+          {
+            type: 'theory',
+            title: 'פרק 2: ארגז הכלים והנוסחאות',
+            icon: <Calculator className="text-emerald-500" size={32} />,
+            content: (
+              <div className="space-y-6 text-slate-700 leading-relaxed text-lg">
+                <p>בקורס הזה נתמקד בעיקר בהשפעה של <strong>ריבית דריבית</strong>. לשם כך, אנו נשענים על 4 נוסחאות מרכזיות. קחו רגע להכיר אותן בצורתן המלאה:</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                  <div className="bg-white p-5 rounded-xl shadow-md border-t-4 border-indigo-400">
+                    <h4 className="font-bold text-indigo-800 mb-2 text-lg">1. מציאת הריבית לתקופת חישוב אחת</h4>
+                    <BeautifulMath>
+                      <i className="mr-1">R<sub>t</sub></i> = <Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} />
+                    </BeautifulMath>
+                    <ul className="text-sm text-slate-600 mt-3 list-disc list-inside space-y-1">
+                      <li><BeautifulMath inline><i className="mx-1">R</i></BeautifulMath> = הריבית הנקובה הנתונה.</li>
+                      <li><BeautifulMath inline><i className="mx-1">n</i></BeautifulMath> = כמה פעמים מחשבים ריבית בתקופה הנקובה.</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-white p-5 rounded-xl shadow-md border-t-4 border-emerald-400">
+                    <h4 className="font-bold text-emerald-800 mb-2 text-lg">2. המרה מנקובה לאפקטיבית</h4>
+                    <BeautifulMath>
+                      <i className="mr-1">r<sub>e</sub></i> = (1 + <Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} />)<sup><i className="ml-1">m</i></sup> - 1
+                    </BeautifulMath>
+                    <ul className="text-sm text-slate-600 mt-3 list-disc list-inside space-y-1">
+                      <li><BeautifulMath inline><i className="mx-1">m</i></BeautifulMath> = יחס התקופות: <MathText>רצוי / מצוי.</MathText></li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-white p-5 rounded-xl shadow-md border-t-4 border-amber-400">
+                    <h4 className="font-bold text-amber-800 mb-2 text-lg">3. מאפקטיבית לאפקטיבית (חזקה בלבד)</h4>
+                    <BeautifulMath>
+                      <i className="mr-1">r<sub>e</sub></i> = (1 + <i className="mx-1">r</i>)<sup><i className="ml-1">m</i></sup> - 1
+                    </BeautifulMath>
+                    <ul className="text-sm text-slate-600 mt-3 list-disc list-inside space-y-1">
+                      <li><BeautifulMath inline><i className="mx-1">r</i></BeautifulMath> = הריבית האפקטיבית הקיימת.</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-white p-5 rounded-xl shadow-md border-t-4 border-rose-400">
+                    <h4 className="font-bold text-rose-800 mb-2 text-lg">4. עסקאות בתשלום אחד (תזרים ישיר)</h4>
+                    <BeautifulMath>
+                      <i className="mr-1">r<sub>e</sub></i> = <Fraction num={<>|<i className="mx-1">P<sub>t</sub></i>|</>} den={<>|<i className="mx-1">P<sub>0</sub></i>|</>} /> - 1
+                    </BeautifulMath>
+                    <ul className="text-sm text-slate-600 mt-3 flex justify-around">
+                      <li><BeautifulMath inline><i className="mx-1">P<sub>t</sub></i></BeautifulMath> = תשלום סופי.</li>
+                      <li><BeautifulMath inline><i className="mx-1">P<sub>0</sub></i></BeautifulMath> = קבלה התחלתית.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )
+          },
+          {
+            type: 'theory',
+            title: 'פרק 3: איך לפצח את m ו-n? (הסוד האמיתי)',
+            icon: <Target className="text-purple-500" size={32} />,
+            content: (
+              <div className="space-y-4 text-slate-700 leading-relaxed text-lg">
+                <p>
+                  הנוסחאות אולי נראות מורכבות, אבל 90% מהטעויות נובעות מבלבול בין שני פרמטרים מרכזיים: <BeautifulMath inline><i className="mx-1">n</i></BeautifulMath> ו- <BeautifulMath inline><i className="mx-1">m</i></BeautifulMath>. בואו נעשה בהם סדר אחת ולתמיד.
+                </p>
+
+                <div className="bg-purple-50 p-6 rounded-2xl border border-purple-200 shadow-sm relative overflow-hidden mb-6">
+                  <h3 className="font-bold text-purple-900 mb-2 text-xl">מי אתה, פרמטר n? ולמה אני צריך אותו?</h3>
+                  <p className="mb-4 text-purple-900 font-medium">
+                    <strong>בשביל מה אני צריך את זה?</strong> אם הריבית הנקובה נתונה ומחושבת מספר פעמים, השלב הראשון הוא <strong>להמיר אותה לריבית בסיס</strong> – לתקופת חישוב אחת בלבד, על ידי חלוקתה ב-n.
+                  </p>
+                  <div className="bg-white p-4 rounded-xl text-center border border-purple-100 font-bold text-purple-800 text-lg mb-4">
+                    <BeautifulMath inline><i className="mx-1">n</i></BeautifulMath> מוגדר כ-מספר תקופות חישוב הריבית "שנכללות" בתוך תקופת הריבית הנקובה הנתונה.
+                  </div>
+                  <p className="text-purple-900">
+                    אפשר לחשב זאת על ידי היחס: <strong className="bg-purple-200 px-2 py-1 rounded">(התקופה הנקובה) / (תדירות החישוב)</strong>.
+                    <br/><br/>
+                    <strong>לדוגמה מספרית:</strong> אם הריבית הנתונה היא <strong>שנתית</strong> (12 חודשים) והיא מחושבת <strong>כל חודש</strong> (1 חודש). 
+                    אז ה-n יהיה 12 (שנה חלקי חודש, <MathText dir="ltr">12/1</MathText>). המונה <BeautifulMath inline><i className="mx-1">R</i></BeautifulMath> יהיה שיעור הריבית הנקובה הנתונה.
+                  </p>
+                </div>
+
+                <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-200 shadow-sm relative overflow-hidden">
+                  <h3 className="font-bold text-indigo-900 mb-2 text-xl">מי אתה, פרמטר m? (כלל רצוי/מצוי)</h3>
+                  <p className="mb-4">ה- <BeautifulMath inline><i className="mx-1">m</i></BeautifulMath> הוא מעריך החזקה. הוא לוקח את ריבית הבסיס שמצאנו, ומנפח אותה לתקופה <strong>שהלקוח ביקש</strong> (התקופה הרצויה).</p>
+                  <div className="bg-white p-4 rounded-xl text-center border border-indigo-100 font-bold text-indigo-800 text-xl flex items-center justify-center gap-4">
+                    <BeautifulMath inline>
+                      <i className="mr-2">m</i> = <Fraction num={<MathText>רצוי (התקופה שביקשו)</MathText>} den={<MathText>מצוי (תדירות החישוב בבנק)</MathText>} />
+                    </BeautifulMath>
+                  </div>
+                  <p className="text-indigo-900 mt-4">
+                    <strong>לדוגמה מספרית:</strong> אם שאלו "מה הריבית <strong>לשנתיים</strong>?" (רצוי = 24 חודשים), והבנק מחשב <strong>כל חודש</strong> (מצוי = 1).
+                    ה-m יהיה 24 (24 חלקי 1).
+                  </p>
+                </div>
+              </div>
+            )
+          },
+          {
+            type: 'exercise',
+            title: 'תרגיל 1.1: לפרק את הנוסחה – פרמטרים (מספרים עגולים)',
+            autoCalculate: true,
+            formulaInfo: {
+              formulaJSX: (
+                <div className="flex flex-col gap-3 items-center">
+                  <BeautifulMath>
+                     <i className="mr-1">r<sub>e</sub></i> = (1 + <Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} />)<sup><i className="ml-1">m</i></sup> - 1
+                  </BeautifulMath>
+                  <div className="text-sm text-indigo-700 bg-indigo-100/50 px-4 py-2 rounded-lg">
+                    נמצא קודם את הפרמטרים <BeautifulMath inline><i className="mx-1">n</i></BeautifulMath>,  <BeautifulMath inline><Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} /></BeautifulMath> ו- <BeautifulMath inline><i className="mx-1">m</i></BeautifulMath>. המערכת תחשב את השאר בשבילך!
+                  </div>
+                </div>
+              ),
+              params: [
+                { name: 'R', desc: 'ריבית נקובה הנתונה' },
+                { name: 'n', desc: 'מספר תקופות החישוב שנכללות בתקופה הנקובה הנתונה' },
+                { name: 'm', desc: 'מעריך חזקה: רצוי (התקופה שביקשו) חלקי מצוי (תדירות החישוב)' }
+              ]
+            },
+            question: 'בנק מציע הלוואה בריבית נקובה חצי-שנתית של 12%. ידוע כי הבנק מחשב את הריבית בפועל כל חודש. נשאלתם מהי הריבית האפקטיבית השנתית. \n\n**מצאו תחילה את הפרמטרים להצבה, והנוסחה תחשב זאת עבורכם.**',
+            params: [
+              { label: 'ריבית נקובה (R)', value: '12%' },
+              { label: 'תקופת הריבית הנקובה', value: 'חצי שנה (6 חודשים)' },
+              { label: 'תדירות חישוב (מצוי)', value: '1 חודש' },
+              { label: 'תקופה נדרשת (רצוי)', value: 'שנה (12 חודשים)' }
+            ],
+            steps: [
+              {
+                id: 'n',
+                title: 'שלב 1: מציאת פרמטר n',
+                prompt: 'הגדרנו ש-n הוא מספר תקופות החישוב שנכללות בתקופת הריבית הנקובה הנתונה. חשב את n:',
+                hint: 'תקופת הריבית הנקובה היא 6 חודשים. תדירות החישוב היא חודש 1. 6 חלקי 1.',
+                correctAnswer: 6,
+                solutionJSX: <BeautifulMath><i className="mr-1">n</i> = <Fraction num="6" den="1" /> = 6</BeautifulMath>,
+                validate: (val) => {
+                  if (val === 12) return "12 זה מספר החודשים בשנה. שים לב שתקופת הריבית *הנקובה* היא חצי שנה בלבד.";
+                  if (val === 1) return "1 זו התקופה המצויה. התקופה הנקובה היא 6.";
+                  if (val === 6) return true;
+                  return "חלק את התקופה הנקובה (6) בתדירות החישוב (1).";
+                },
+                successMessage: "מצוין. המשמעות של n=6 היא שהריבית שנתנו לנו (12%) מורכבת מ-6 תחנות חישוב שונות (חודשים)."
+              },
+              {
+                id: 'rt',
+                title: 'שלב 2: הריבית התקופתית (R/n)',
+                prompt: 'אנו רוצים להמיר את הריבית הנתונה לריבית בסיס (לתקופת חישוב אחת). חלקו את R ב-n:',
+                hint: 'הריבית הנקובה היא 12. ה-n שמצאנו הוא 6.',
+                correctAnswer: 2,
+                solutionJSX: <BeautifulMath><Fraction num={<><i className="mr-1">R</i></>} den={<><i className="mx-1">n</i></>} /> = <Fraction num="12%" den="6" /> = 2%</BeautifulMath>,
+                validate: (val) => {
+                  if (val === 12) return "12 זו הריבית לחצי שנה כולה. עלינו לחלק אותה ב-n.";
+                  if (val === 2) return true;
+                  return "12 לחלק ל-6.";
+                },
+                successMessage: "כל הכבוד, זה בעצם R הריבית הנקובה חלקי n מספר תקופות החישוב. זו למעשה ריבית הבסיס; היא גם הנקובה וגם האפקטיבית, אבל היא לתקופת חישוב אחת (חודש). כעת, בוא ננסה להמיר אותה לשנה."
+              },
+              {
+                id: 'm',
+                title: 'שלב 3: מעריך החזקה (m)',
+                prompt: 'השתמש בכלל: רצוי (התקופה שביקשו) חלקי מצוי (תדירות החישוב). מצא את m:',
+                hint: 'רצוי = 12 חודשים (שנה). מצוי = 1 חודש. 12 חלקי 1.',
+                correctAnswer: 12,
+                solutionJSX: <BeautifulMath><i className="mr-1">m</i> = <Fraction num={<MathText>רצוי (12)</MathText>} den={<MathText>מצוי (1)</MathText>} /> = 12</BeautifulMath>,
+                validate: (val) => {
+                  if (val === 6) return "6 זה רק לחצי שנה. שים לב ששאלו מהי הריבית האפקטיבית ל*שנה* שלמה.";
+                  if (val === 12) return true;
+                  return "רצוי (12) חלקי מצוי (1).";
+                },
+                successMessage: "מעולה. מצאנו ש-m=12. המשמעות היא שצריך 'להקפיץ' את ריבית הבסיס (2%) ב-12 תחנות כדי לקבל את האפקטיבית השנתית."
+              }
+            ],
+            summaryCalc: {
+              formulaJSX: <BeautifulMath><i className="mr-1">r<sub>e</sub></i> = (1 + 0.02)<sup>12</sup> - 1 = 26.82%</BeautifulMath>,
+              explanation: 'המערכת הציבה את הפרמטרים שמצאתם אל תוך הנוסחה המלאה. במקום להתבלבל, פירקנו את החישוב לשלבים בטוחים והגענו לריבית האפקטיבית המדויקת.'
+            }
+          },
+          {
+            type: 'exercise',
+            title: 'תרגיל 1.2: זיהוי פרמטרים והצבה אוטומטית (רבעונים)',
+            autoCalculate: true,
+            formulaInfo: {
+              formulaJSX: (
+                <BeautifulMath>
+                   <i className="mr-1">r<sub>e</sub></i> = (1 + <Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} />)<sup><i className="ml-1">m</i></sup> - 1
+                </BeautifulMath>
+              ),
+              params: []
+            },
+            question: 'חברת אשראי מציעה הלוואה בריבית נקובה שנתית של 24%. החישוב מתבצע כל רבעון (3 חודשים). הלקוח שואל את עצמו, מהי הריבית לכל חצי שנה. \nהזינו רק את הפרמטרים!',
+            params: [
+              { label: 'ריבית נקובה (R)', value: '24%' },
+              { label: 'תקופת הריבית הנקובה', value: '12 חודשים (שנה)' },
+              { label: 'תדירות חישוב (מצוי)', value: '3 חודשים (רבעון)' },
+              { label: 'תקופה נדרשת (רצוי)', value: '6 חודשים (חצי שנה)' }
+            ],
+            steps: [
+              {
+                id: 'n',
+                title: 'שלב 1: מציאת n',
+                prompt: 'כמה רבעונים (3 חודשים) נכנסים בתוך התקופה הנקובה (12 חודשים)?',
+                hint: '12 חלקי 3.',
+                correctAnswer: 4,
+                solutionJSX: <BeautifulMath><i className="mr-1">n</i> = <Fraction num="12" den="3" /> = 4</BeautifulMath>,
+                validate: (val) => val === 4 ? true : "12 חלקי 3.",
+                successMessage: "נכון. יש 4 רבעונים בשנה. ה-24% מחולקים ל-4 תחנות שונות."
+              },
+              {
+                id: 'rt',
+                title: 'שלב 2: הריבית לתקופת חישוב (R/n)',
+                prompt: 'מהי הריבית לרבעון אחד באחוזים?',
+                hint: '24 חלקי 4.',
+                correctAnswer: 6,
+                solutionJSX: <BeautifulMath><Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} /> = <Fraction num="24%" den="4" /> = 6%</BeautifulMath>,
+                validate: (val) => val === 6 ? true : "חלק את 24 ב-4.",
+                successMessage: "יפה מאד. קיבלנו שריבית הבסיס לתקופת חישוב היא 6%. זו הריבית האפקטיבית לרבעון."
+              },
+              {
+                id: 'm',
+                title: 'שלב 3: מעריך החזקה (m)',
+                prompt: 'רצוי חלקי מצוי: הלקוח רוצה ריבית לחצי שנה (6 חודשים). החישוב הוא כל רבעון (3 חודשים). מהו m?',
+                hint: 'רצוי (6) חלקי מצוי (3).',
+                correctAnswer: 2,
+                solutionJSX: <BeautifulMath><i className="mr-1">m</i> = <Fraction num={<MathText>רצוי (6)</MathText>} den={<MathText>מצוי (3)</MathText>} /> = 2</BeautifulMath>,
+                validate: (val) => val === 2 ? true : "6 חלקי 3.",
+                successMessage: "בדיוק. כדי לחשב לחצי שנה, נצטרך 'להקפיץ' את הריבית הרבעונית שמצאנו 2 פעמים."
+              }
+            ],
+            summaryCalc: {
+              formulaJSX: <BeautifulMath><i className="mr-1">r<sub>e</sub></i> = (1 + 0.06)<sup>2</sup> - 1 = 12.36%</BeautifulMath>,
+              explanation: 'הצבנו את ריבית הבסיס (6%) ואת מעריך החזקה (2) אל תוך הנוסחה. התוצאה היא הריבית האפקטיבית לחצי שנה.'
+            }
+          },
+          {
+            type: 'exercise',
+            title: 'תרגיל 2.1: שברים במעריך החזקה',
+            autoCalculate: true,
+            formulaInfo: {
+              formulaJSX: (
+                <BeautifulMath>
+                   <i className="mr-1">r<sub>e</sub></i> = (1 + <Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} />)<sup><i className="ml-1">m</i></sup> - 1
+                </BeautifulMath>
+              ),
+              params: []
+            },
+            question: 'הריבית הנתונה היא 10% לשנה (נקובה). מחושבת כל 6 חודשים (חצי שנה). מהי הריבית האפקטיבית לחודשיים?',
+            params: [
+              { label: 'ריבית נקובה (R)', value: '10%' },
+              { label: 'תקופת הריבית הנקובה', value: '12 חודשים' },
+              { label: 'תדירות חישוב (מצוי)', value: '6 חודשים' },
+              { label: 'תקופה נדרשת (רצוי)', value: '2 חודשים' }
+            ],
+            steps: [
+              {
+                id: 'n',
+                title: 'שלב 1: מציאת n',
+                prompt: 'תקופה נקובה חלקי תקופת חישוב. מצא את n:',
+                hint: '12 חודשים חלקי 6 חודשים.',
+                correctAnswer: 2,
+                solutionJSX: <BeautifulMath><i className="mr-1">n</i> = <Fraction num="12" den="6" /> = 2</BeautifulMath>,
+                validate: (val) => val === 2 ? true : "12 חלקי 6."
+              },
+              {
+                id: 'rt',
+                title: 'שלב 2: הריבית לתקופת חישוב (R/n)',
+                prompt: 'מהי ריבית הבסיס ל-6 חודשים?',
+                hint: '10 חלקי 2.',
+                correctAnswer: 5,
+                solutionJSX: <BeautifulMath><Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} /> = <Fraction num="10%" den="2" /> = 5%</BeautifulMath>,
+                validate: (val) => val === 5 ? true : "10 חלקי 2."
+              },
+              {
+                id: 'm_fraction',
+                title: 'שלב 3: מעריך החזקה (m)',
+                prompt: 'רצוי (2 חודשים) חלקי מצוי (6 חודשים). הזן את התשובה כשבר (למשל 1/3, או 2/6):',
+                hint: 'הרצוי הוא 2. המצוי הוא 6. אפשר גם לצמצם.',
+                correctAnswer: 1/3,
+                solutionJSX: <BeautifulMath><i className="mr-1">m</i> = <Fraction num="2" den="6" /> = <Fraction num="1" den="3" /></BeautifulMath>,
+                validate: (val) => {
+                  let numVal = val;
+                  if (typeof val === 'string' && val.includes('/')) {
+                    const parts = val.split('/');
+                    numVal = parseFloat(parts[0]) / parseFloat(parts[1]);
+                  }
+                  if (Math.abs(numVal - (1/3)) < 0.01) return true;
+                  if (numVal === 3) return "הפוך! עשית מצוי (6) חלקי רצוי (2). זכור: הרצוי יושב במונה (למעלה).";
+                  return "רצוי הוא 2, מצוי הוא 6. התוצאה היא 2/6 או שליש (1/3).";
+                },
+                successMessage: "מה למדנו כאן? שאפשר כמובן להציג ערכים בשברים במעריך! חזקה שברירית היא פשוט דרך להגיד שאנחנו לוקחים 'חלק' מתקופת החישוב המלאה."
+              }
+            ],
+            summaryCalc: {
+              formulaJSX: <BeautifulMath><i className="mr-1">r<sub>e</sub></i> = (1 + 0.05)<sup>1/3</sup> - 1 = 1.64%</BeautifulMath>,
+              explanation: 'העלאה בחזקת שבר מתבצעת בקלות במחשבון הפיננסי או המדעי. הריבית לחודשיים היא מעט פחות מחלק יחסי פשוט (שהיה נותן 1.66%) בגלל אפקט הדריבית.'
+            }
+          },
+          {
+            type: 'theory',
+            title: 'פרק 4: מלכודת האקסל וסדרות התשלומים',
+            icon: <TrendingUp className="text-orange-500" size={32} />,
+            content: (
+              <div className="space-y-4 text-slate-700 leading-relaxed text-lg">
+                <p>
+                  כאשר נתקלים בחישוב ערך נוכחי (PV) או עתידי (FV) של <strong>סדרת תשלומים באקסל (PMT)</strong>, יש כלל ברזל אכזרי. תחילה, נזכיר את משמעות הפרמטרים באקסל:
+                </p>
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                  <table className="w-full text-right border-collapse">
+                    <thead className="bg-slate-100 border-b border-slate-200 text-slate-800">
+                      <tr>
+                        <th className="p-3 font-bold border-l border-slate-200" dir="ltr">Parameter</th>
+                        <th className="p-3 font-bold">משמעות בעברית</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      <tr><td className="p-3 font-mono font-bold border-l border-slate-200" dir="ltr">Rate</td><td className="p-3">שיעור הריבית לתקופת תשלום אחת (זה מה שנחשב!)</td></tr>
+                      <tr><td className="p-3 font-mono font-bold border-l border-slate-200" dir="ltr">Nper</td><td className="p-3">מספר התשלומים הכולל בסדרה</td></tr>
+                      <tr><td className="p-3 font-mono font-bold border-l border-slate-200" dir="ltr">Pmt</td><td className="p-3">התשלום התקופתי הקבוע</td></tr>
+                      <tr><td className="p-3 font-mono font-bold border-l border-slate-200" dir="ltr">PV</td><td className="p-3">ערך נוכחי (סכום התחלתי)</td></tr>
+                      <tr><td className="p-3 font-mono font-bold border-l border-slate-200" dir="ltr">FV</td><td className="p-3">ערך עתידי (סכום סופי)</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div className="bg-orange-50 p-6 rounded-2xl border-l-8 border-orange-400 shadow-sm mt-4">
+                  <h3 className="font-bold text-orange-900 text-2xl mb-3">כלל הברזל לסדרות:</h3>
+                  <p className="text-orange-800 text-xl font-medium bg-white p-4 rounded-lg inline-block border border-orange-200">
+                    "כאשר עוסקים בסדרה (PMT שונה מאפס), ה-Rate חייב לייצג את <strong className="text-orange-600 underline">הריבית האפקטיבית לפרק הזמן שבין התשלומים</strong>!"
+                  </p>
+                  <p className="mt-4 text-orange-900">
+                    כלומר: ה"רצוי" שלנו לריבית נקבע <strong>אך ורק</strong> לפי תדירות התשלום. תשלום כל חצי שנה? ה-Rate חייב להיות אפקטיבי לחצי שנה. בואו נראה את זה ב-3 דרגות קושי.
+                  </p>
+                </div>
+              </div>
+            )
+          },
+          {
+            type: 'exercise',
+            title: 'תרגיל 4.1: רמה קלה - המרה מאפקטיבית לאפקטיבית (m<1)',
+            hasExcelSim: true,
+            formulaInfo: {
+              formulaJSX: (
+                <>
+                  <BeautifulMath><i className="mr-1">r<sub>e</sub></i> = (1 + <i className="mx-1">r</i>)<sup><i className="ml-1">m</i></sup> - 1</BeautifulMath>
+                  <div className="text-sm text-center text-indigo-700 mt-2">(משתמשים רק בחזקה כי הריבית הנתונה כבר אפקטיבית)</div>
+                </>
+              ),
+              params: []
+            },
+            question: 'שירה מפקידה 2,000 ש"ח בתום כל חצי שנה למשך 5 שנים. הריבית השנתית הנתונה היא 10% **אפקטיבית**. \n\nמהי הריבית (Rate) שיש להציב באקסל?',
+            params: [
+              { label: 'תדירות תשלום (הרצוי!)', value: '6 חודשים (חצי שנה)' },
+              { label: 'ריבית נתונה', value: '10% (אפקטיבית!)' },
+              { label: 'תקופה נתונה (המצוי)', value: '12 חודשים (שנה)' }
+            ],
+            steps: [
+              {
+                id: 'm',
+                title: 'שלב 1: מציאת m בלבד',
+                prompt: 'מכיוון שהריבית כבר אפקטיבית, אין לנו R/n! אנחנו מיד קופצים לחזקה. רצוי (תדירות התשלום) חלקי מצוי (תקופת הריבית הנתונה). מצא את m כשבר:',
+                hint: 'רצוי = 6, מצוי = 12. 6 חלקי 12.',
+                correctAnswer: 1/2,
+                solutionJSX: <BeautifulMath><i className="mr-1">m</i> = <Fraction num="6" den="12" /> = <Fraction num="1" den="2" /></BeautifulMath>,
+                validate: (val) => {
+                  let numVal = val;
+                  if (typeof val === 'string' && val.includes('/')) {
+                    const parts = val.split('/');
+                    numVal = parseFloat(parts[0]) / parseFloat(parts[1]);
+                  }
+                  return Math.abs(numVal - 0.5) < 0.01 ? true : "רצוי (6) חלקי מצוי (12) = 1/2.";
+                },
+                successMessage: "מעולה. מאחר והריבית השנתית הנתונה היא האמיתית (אפקטיבית), אנחנו פשוט מושכים אותה אחורה לחצי שנה בעזרת חזקת 1/2."
+              },
+              {
+                id: 'final',
+                title: 'שלב 2: הריבית לסדרה (Rate)',
+                prompt: 'חשב את הריבית האפקטיבית (באחוזים, 2 ספרות עשרוניות).',
+                hint: '1.10 בחזקת 0.5, פחות 1.',
+                correctAnswer: 4.88,
+                solutionJSX: <BeautifulMath>Rate = (1 + 0.10)<sup>1/2</sup> - 1 = 4.88%</BeautifulMath>,
+                validate: (val) => Math.abs(val - 4.88) <= 0.1 ? true : "1.10 בחזקת 0.5, פחות 1. כפול 100.",
+                successMessage: "מה למדנו כאן? כאשר הריבית כבר אפקטיבית, ממירים רק עם מעריך חזקה מתאים!"
+              }
+            ]
+          },
+          {
+            type: 'exercise',
+            title: 'תרגיל 4.2: רמה בינונית - המרה מאפקטיבית לאפקטיבית (m>1)',
+            hasExcelSim: true,
+            formulaInfo: {
+              formulaJSX: <BeautifulMath><i className="mr-1">r<sub>e</sub></i> = (1 + <i className="mx-1">r</i>)<sup><i className="ml-1">m</i></sup> - 1</BeautifulMath>,
+              params: []
+            },
+            question: 'יואב משלם 1,500 ש"ח בתום כל רבעון (3 חודשים) במשך שנתיים. נתון כי הריבית האפקטיבית לחודש היא 2%. \n\nמהי הריבית (Rate) באקסל?',
+            params: [
+              { label: 'תדירות תשלום (הרצוי!)', value: '3 חודשים' },
+              { label: 'ריבית נתונה', value: '2% (אפקטיבית!)' },
+              { label: 'תקופה נתונה (המצוי)', value: '1 חודש' }
+            ],
+            steps: [
+              {
+                id: 'm',
+                title: 'שלב 1: מציאת m',
+                prompt: 'שוב, הריבית אפקטיבית, אז רק חזקה! רצוי (תשלום) חלקי מצוי (תקופת הנתון). מהו m?',
+                hint: 'רצוי 3, מצוי 1. התשובה היא 3.',
+                correctAnswer: 3,
+                solutionJSX: <BeautifulMath><i className="mr-1">m</i> = <Fraction num="3" den="1" /> = 3</BeautifulMath>,
+                validate: (val) => val === 3 ? true : "רצוי (3) חלקי מצוי (1) = 3.",
+                successMessage: "נכון. הפעם אנחנו מעלים ריבית של תקופה קצרה (חודש) לתקופה ארוכה יותר (רבעון)."
+              },
+              {
+                id: 'final',
+                title: 'שלב 2: הריבית לסדרה (Rate)',
+                prompt: 'מכיוון שהריבית כבר אפקטיבית, אין לנו R/n! אנחנו מיד קופצים לחזקה (באחוזים, 2 ספרות עשרוניות).',
+                hint: '1.02 בחזקת 3, פחות 1.',
+                correctAnswer: 6.12,
+                solutionJSX: <BeautifulMath>Rate = (1 + 0.02)<sup>3</sup> - 1 = 6.12%</BeautifulMath>,
+                validate: (val) => Math.abs(val - 6.12) <= 0.1 ? true : "1.02 בחזקת 3, פחות 1.",
+                successMessage: "מצוין. דוגמה יפה למעריך שגדול מ-1. עכשיו הזינו נתונים לאקסל למטה (שימו לב כמה תשלומים סך הכל יש בשנתיים רבעוניות? 8 תשלומים)."
+              }
+            ]
+          },
+          {
+            type: 'exercise',
+            title: 'תרגיל 4.3: רמה גבוהה - מנקובה לאפקטיבית בתוך סדרה',
+            hasExcelSim: true,
+            formulaInfo: {
+              formulaJSX: <BeautifulMath>Rate = (1 + <Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} />)<sup><i className="ml-1">m</i></sup> - 1</BeautifulMath>,
+              params: []
+            },
+            question: 'חברת ביטוח מציעה לקבל 5,000 ש"ח בתום כל רבעון (3 חודשים) במשך 4 שנים. הריבית הנקובה השנתית היא 12%, מחושבת כל חודש! \n\nמהו ה-Rate (הריבית לרבעון)?',
+            params: [
+              { label: 'תדירות תשלום (הרצוי!)', value: '3 חודשים (רבעון)' },
+              { label: 'ריבית נקובה', value: '12% לשנה' },
+              { label: 'תדירות חישוב (מצוי)', value: '1 חודש' }
+            ],
+            steps: [
+              {
+                id: 'rn',
+                title: 'שלב 1: מציאת n והריבית התקופתית',
+                prompt: 'הריבית *נקובה*. קודם נפרק אותה. כמה פעמים חישוב (חודש) נכנס בנקובה (שנה)? נכון, 12. אז מהי הריבית לחודש (R/n)?',
+                hint: '12% לשנה מחושבת כל חודש. 12/12.',
+                correctAnswer: 1,
+                solutionJSX: <BeautifulMath><Fraction num={<i className="mx-1">R</i>} den={<i className="mx-1">n</i>} /> = <Fraction num="12%" den="12" /> = 1%</BeautifulMath>,
+                validate: (val) => val === 1 ? true : "12 חלקי 12.",
+                successMessage: "ריבית הבסיס (המצויה) היא 1% לחודש."
+              },
+              {
+                id: 'm',
+                title: 'שלב 2: מעריך החזקה (m)',
+                prompt: 'רצוי (תדירות התשלום) חלקי מצוי (תדירות החישוב). מהו m?',
+                hint: 'תשלום כל 3 חודשים. חישוב כל 1 חודש. 3 חלקי 1.',
+                correctAnswer: 3,
+                solutionJSX: <BeautifulMath><i className="mr-1">m</i> = <Fraction num="3" den="1" /> = 3</BeautifulMath>,
+                validate: (val) => val === 3 ? true : "רצוי 3, מצוי 1. התשובה 3.",
+                successMessage: "נכון. נפעיל דריבית 3 פעמים."
+              },
+              {
+                id: 'final',
+                title: 'שלב 3: הריבית לסדרה (Rate)',
+                prompt: 'חשב את הריבית שתזין לאקסל (2 ספרות עשרוניות).',
+                hint: '1.01 בחזקת 3, פחות 1.',
+                correctAnswer: 3.03,
+                solutionJSX: <BeautifulMath>Rate = (1 + 0.01)<sup>3</sup> - 1 = 3.03%</BeautifulMath>,
+                validate: (val) => Math.abs(val - 3.03) <= 0.1 ? true : "1.01 בחזקת 3.",
+                successMessage: "מה למדנו כאן? כאשר הריבית נקובה, אנו מבצעים המרה מלאה (עם חלוקה ב-n ואז חזקה ב-m) כדי להתאים את הריבית לתדירות התשלום בסדרה!"
+              }
+            ]
+          },
+          {
+            type: 'theory',
+            title: 'פרק 5: עסקאות בתשלום אחד (תזרים ישיר)',
+            icon: <Coins className="text-emerald-500" size={32} />,
+            content: (
+              <div className="space-y-4 text-slate-700 leading-relaxed text-lg">
+                <p>
+                  כשיש לנו הלוואה או השקעה שנפתחת היום (P0) ונפרעת במכה אחת בסוף (Pt), ואין תשלומים באמצע (סדרה), אין צורך להסתבך עם הנוסחאות המורכבות לעיל. אנו יכולים פשוט לחשב את <strong>הצמיחה הישירה</strong> של הכסף.
+                </p>
+                <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-200">
+                  <BeautifulMath>
+                    <i className="mr-1">r<sub>e</sub></i> = <Fraction num={<>|<i className="mx-1">P<sub>t</sub></i>|</>} den={<>|<i className="mx-1">P<sub>0</sub></i>|</>} /> - 1
+                  </BeautifulMath>
+                  <ul className="mt-4 space-y-2 text-emerald-900 list-disc list-inside">
+                    <li><strong className="text-emerald-950">למה ערך מוחלט?</strong> כדי להתעלם מהסימנים של פלוס ומינוס, ולהתמקד בגודל היחסי (כמה החזרתי חלקי כמה קיבלתי).</li>
+                    <li><strong>חשוב מאוד:</strong> נוסחה זו תמיד נותנת את הריבית האפקטיבית ל<strong>כל תקופת העסקה שבין שני התשלומים</strong> (גם אם היא 5 שנים). אם מבקשים מאיתנו להמיר את זה לריבית שנתית, נצטרך להשתמש בנוסחת ההמרה (חזקה בלבד) שלמדנו.</li>
+                  </ul>
+                </div>
+              </div>
+            )
+          },
+          {
+            type: 'exercise',
+            title: 'תרגיל 5.1: חישוב תזרים ישיר קלאסי',
+            formulaInfo: {
+              formulaJSX: <BeautifulMath><i className="mr-1">r<sub>e</sub></i> = <Fraction num={<>|<i className="mx-1">P<sub>t</sub></i>|</>} den={<>|<i className="mx-1">P<sub>0</sub></i>|</>} /> - 1</BeautifulMath>,
+              params: []
+            },
+            question: 'נטלת הלוואה של 40,000 ש"ח היום. בעוד שנתיים וחצי החזרת לבנק סכום של 52,000 ש"ח (הכולל קרן וריבית). מהי הריבית האפקטיבית ששילמת לתקופה זו של שנתיים וחצי?',
+            params: [
+              { label: 'תזרים ביום אפס (P0)', value: '40,000' },
+              { label: 'תזרים סופי (Pt)', value: '-52,000' }
+            ],
+            steps: [
+              {
+                id: 'calc',
+                title: 'חישוב הריבית לכל העסקה',
+                prompt: 'הצב בנוסחת הערכים המוחלטים (באחוזים).',
+                hint: '52000 חלקי 40000. מהתוצאה הורד 1 והכפל ב-100.',
+                correctAnswer: 30,
+                solutionJSX: <BeautifulMath>r<sub>2.5y</sub> = <Fraction num="52000" den="40000" /> - 1 = 30%</BeautifulMath>,
+                validate: (val) => {
+                  if (Math.abs(val - 30) <= 0.1) return true;
+                  if (val === 1.3) return "היחס הוא 1.3, אל תשכח להוריד 1 (כדי להשאר רק עם הריבית) ולהכפיל ב-100.";
+                  return "נסה שוב: 52 אלף לחלק ל-40 אלף, פחות 1.";
+                },
+                successMessage: "הבנת מצוין. שיטת התזרים הישיר היא המהירה והבטוחה ביותר לעסקאות פשוטות של תשלום בודד."
+              }
+            ]
+          },
+          {
+            type: 'exercise',
+            title: 'תרגיל 5.2: תזרים ישיר + התאמה שנתית (רמת בחינה)',
+            formulaInfo: {
+              formulaJSX: (
+                <div className="flex flex-col items-center">
+                  <BeautifulMath>1. &nbsp;&nbsp; r<sub>total</sub> = <Fraction num={<>|<i className="mx-1">P<sub>t</sub></i>|</>} den={<>|<i className="mx-1">P<sub>0</sub></i>|</>} /> - 1</BeautifulMath>
+                  <div className="my-1"></div>
+                  <BeautifulMath>2. &nbsp;&nbsp; r<sub>annual</sub> = (1 + r<sub>total</sub>)<sup>m</sup> - 1</BeautifulMath>
+                </div>
+              ),
+              params: []
+            },
+            question: 'חברת פלוס הפקידה 100,000 ש"ח בחיסכון, וקיבלה לאחר שנתיים סכום של 121,000 ש"ח. \n\nמהי הריבית האפקטיבית השנתית בעסקה זו?',
+            params: [
+              { label: 'הפקדה (P0)', value: '-100,000' },
+              { label: 'תקבול לאחר שנתיים (Pt)', value: '+121,000' }
+            ],
+            steps: [
+              {
+                id: 'total',
+                title: 'שלב 1: הריבית לכל התקופה (שנתיים)',
+                prompt: 'חשבו בעזרת התזרים הישיר את הריבית האפקטיבית לשנתיים כולה.',
+                hint: '121000 חלקי 100000, פחות 1.',
+                correctAnswer: 21,
+                solutionJSX: <BeautifulMath>r<sub>2y</sub> = <Fraction num="121000" den="100000" /> - 1 = 21%</BeautifulMath>,
+                validate: (val) => Math.abs(val - 21) <= 0.1 ? true : "חלוקה פשוטה.",
+                successMessage: "מעולה. מצאנו שהכסף צמח ב-21% על פני שנתיים. זוהי ריבית אפקטיבית מלאה, אך היא לשנתיים."
+              },
+              {
+                id: 'annual',
+                title: 'שלב 2: המרה לריבית שנתית (מאפקטיבית לאפקטיבית)',
+                prompt: 'כעת עלינו להמיר את ה-21% (שהיא לשנתיים) לריבית של שנה 1. רצוי (1) חלקי מצוי (2). חשבו את הריבית השנתית (2 ספרות עשרוניות).',
+                hint: '1.21 בחזקת 1/2 (או 0.5), פחות 1.',
+                correctAnswer: 10,
+                solutionJSX: <BeautifulMath>r<sub>1y</sub> = (1 + 0.21)<sup>1/2</sup> - 1 = 10%</BeautifulMath>,
+                validate: (val) => Math.abs(val - 10) <= 0.1 ? true : "1.21 בחזקת 0.5, פחות 1.",
+                successMessage: "מושלם! זהו תהליך שלם: חילוץ ריבית מתוך תזרים יחיד, ואז המרתה (באמצעות חזקה בלבד) לכל פרק זמן שמבקשים מאיתנו."
+              }
+            ]
+          }
+        ];
+
+        // --- Sub-components ---
+
+        const FormulaBox = ({ info }) => {
+          if (!info) return null;
+          return (
+            <div className="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-5 mb-6 shadow-sm">
+              <h4 className="font-bold text-indigo-900 mb-3 flex items-center gap-2 text-lg">
+                <Lightbulb size={24} className="text-amber-500" />
+                תזכורת: נוסחאות מיישמות
+              </h4>
+              <div className="mb-4 text-center">
+                {info.formulaJSX}
+              </div>
+              {info.params && info.params.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-indigo-800 border-t border-indigo-200/50 pt-4 mt-2">
+                  {info.params.map((param, idx) => (
+                    <div key={idx} className="flex items-start gap-2 bg-indigo-100/50 p-2.5 rounded border border-indigo-100">
+                      <span className="font-mono font-bold bg-indigo-200 px-1.5 py-0.5 rounded text-indigo-900 block min-w-max" dir="ltr">{param.name}</span>
+                      <span className="leading-snug">{param.desc}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        const StepBox = ({ step, index, isActive, isCompleted, isSkipped, onComplete }) => {
+          const [inputVal, setInputVal] = useState('');
+          const [errorMsg, setErrorMsg] = useState('');
+          const [showHint, setShowHint] = useState(false);
+          const inputRef = useRef(null);
+
+          useEffect(() => {
+            if (isActive && inputRef.current && !isCompleted) {
+              setTimeout(() => inputRef.current.focus(), 100);
+            }
+          }, [isActive, isCompleted]);
+
+          const parseInput = (str) => {
+            const cleanStr = str.replace(/,/g, '');
+            if (cleanStr.includes('/')) {
+              const parts = cleanStr.split('/');
+              if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                return parseFloat(parts[0]) / parseFloat(parts[1]);
+              }
+            }
+            return parseFloat(cleanStr);
+          };
+
+          const handleCheck = () => {
+            if (!inputVal.trim()) return;
+            
+            const parsed = parseInput(inputVal);
+            const valToTest = inputVal.includes('/') ? inputVal : parsed;
+            
+            const validationResult = step.validate(valToTest);
+            
+            if (validationResult === true) {
+              setErrorMsg('');
+              onComplete(false); // Not skipped
+            } else {
+              setErrorMsg(validationResult);
+              setShowHint(true); 
+            }
+          };
+
+          const handleSkip = () => {
+            let ans = step.correctAnswer;
+            if (Math.abs(ans - (1/3)) < 0.01) ans = "1/3";
+            else if (Math.abs(ans - 0.5) < 0.01) ans = "1/2";
+            
+            setInputVal(ans.toString());
+            setErrorMsg('');
+            onComplete(true); // Skipped
+          };
+
+          if (!isActive && !isCompleted) return null;
+
+          return (
+            <div className={`border-2 rounded-xl p-5 mb-5 transition-all duration-500 shadow-md
+              ${isSkipped ? 'border-amber-300 bg-amber-50' : 
+                isCompleted ? 'border-emerald-300 bg-emerald-50' : 'border-blue-400 bg-white'}`}>
+              
+              <div className="flex justify-between items-center mb-4">
+                <h3 className={`font-bold text-lg flex items-center gap-3 
+                  ${isSkipped ? 'text-amber-800' : isCompleted ? 'text-emerald-800' : 'text-blue-800'}`}>
+                  <span className={`flex items-center justify-center w-8 h-8 rounded-full text-white shadow-sm font-black
+                    ${isSkipped ? 'bg-amber-500' : isCompleted ? 'bg-emerald-500' : 'bg-blue-600'}`}>
+                    {index + 1}
+                  </span>
+                  {step.title}
+                </h3>
+                {isSkipped ? <FastForward className="text-amber-500" size={28} /> : 
+                 isCompleted ? <CheckCircle2 className="text-emerald-500" size={28} /> : null}
+              </div>
+              
+              <p className="text-slate-800 mb-4 font-medium text-lg leading-relaxed">{step.prompt}</p>
+
+              {isCompleted ? (
+                <div className="space-y-4 animate-fade-in">
+                  <div className={`p-4 rounded-xl border flex flex-col items-center shadow-sm ${isSkipped ? 'bg-white border-amber-200' : 'bg-white border-emerald-100'}`}>
+                    <span className={`font-bold mb-2 ${isSkipped ? 'text-amber-700' : 'text-emerald-700'}`}>
+                      {isSkipped ? 'פתרון מתמטי (דולג):' : 'פתרון מתמטי מלא:'}
+                    </span>
+                    {step.solutionJSX ? (
+                      <div className="scale-110 mt-2">{step.solutionJSX}</div>
+                    ) : (
+                      <BeautifulMath inline>{inputVal}</BeautifulMath>
+                    )}
+                  </div>
+                  
+                  {step.successMessage && !isSkipped && (
+                    <div className="bg-emerald-100/50 border border-emerald-200 p-4 rounded-xl flex items-start gap-3 shadow-sm">
+                      <GraduationCap className="text-emerald-600 shrink-0 mt-1" size={24} />
+                      <div>
+                        <strong className="block text-emerald-800 mb-1">הסבר והרחבה:</strong>
+                        <p className="text-emerald-900 leading-snug font-medium">{step.successMessage}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {isSkipped && (
+                    <div className="bg-amber-100/50 border border-amber-200 p-3 rounded-xl flex items-center gap-2">
+                      <Info className="text-amber-600" size={20} />
+                      <span className="text-amber-800 text-sm">בחרת לראות את התשובה ולדלג על שלב זה. אפשר להמשיך הלאה.</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <input 
+                      ref={inputRef}
+                      dir="ltr"
+                      type="text" 
+                      value={inputVal}
+                      onChange={(e) => setInputVal(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleCheck()}
+                      placeholder="הזן ערך..."
+                      className="border-2 border-slate-300 rounded-xl px-4 py-3 w-full sm:max-w-[180px] text-center text-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all font-mono shadow-inner bg-slate-50"
+                    />
+                    <button 
+                      onClick={handleCheck}
+                      className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md hover:shadow-lg w-full sm:w-auto"
+                    >
+                      בדוק תשובה
+                    </button>
+                    
+                    <div className="flex gap-2 w-full sm:w-auto">
+                      <button 
+                        onClick={() => setShowHint(!showHint)}
+                        className={`flex-1 sm:flex-none py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 border-2 ${showHint ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600'}`}
+                        title="בקש רמז מכוון"
+                      >
+                        <Lightbulb size={20} className={showHint ? "text-amber-500" : "text-slate-400"} />
+                        <span className="sm:hidden font-bold">רמז</span>
+                      </button>
+                      
+                      <button 
+                        onClick={handleSkip}
+                        className="flex-1 sm:flex-none py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 border-2 bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-600"
+                        title="התעייפתי - גלה לי את התשובה"
+                      >
+                        <FastForward size={20} />
+                        <span className="sm:hidden font-bold">התעייפתי</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {errorMsg && (
+                    <div className="bg-red-50 text-red-800 p-4 rounded-xl flex items-start gap-3 border-2 border-red-200 animate-pulse">
+                      <AlertTriangle className="shrink-0 mt-0.5 text-red-500" size={24} />
+                      <div>
+                        <strong className="block mb-1 text-red-900">זיהוי שגיאה:</strong>
+                        <p className="text-base leading-snug">{errorMsg}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {showHint && (
+                    <div className="bg-amber-50 text-amber-900 p-4 rounded-xl flex items-start gap-3 border-2 border-amber-200 shadow-sm animate-fade-in">
+                      <Lightbulb className="shrink-0 mt-0.5 text-amber-500" size={24} />
+                      <div>
+                        <strong className="block mb-1">רמז מחשבתי:</strong>
+                        <p className="text-base leading-snug">{step.hint}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        const ExerciseScreen = ({ content, onFinish }) => {
+          const [currentStepIndex, setCurrentStepIndex] = useState(0);
+          const [completedSteps, setCompletedSteps] = useState([]);
+
+          const handleStepComplete = (isSkipped) => {
+            const newCompleted = [...completedSteps];
+            newCompleted[currentStepIndex] = { isSkipped };
+            setCompletedSteps(newCompleted);
+
+            if (currentStepIndex < content.steps.length - 1) {
+              setCurrentStepIndex(prev => prev + 1);
+            }
+          };
+
+          const isFullyCompleted = completedSteps.length === content.steps.length;
+
+          return (
+            <div className="animate-fade-in relative">
+              {isFullyCompleted && <Confetti />}
+              <FormulaBox info={content.formulaInfo} />
+
+              <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-6 mb-8 shadow-sm">
+                <h2 className="text-xl font-bold text-slate-800 mb-6 leading-relaxed whitespace-pre-line">{content.question}</h2>
+                
+                {/* Dynamic Parameters Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-slate-600">
+                  {content.params.map((param, idx) => (
+                     <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                       <span className="block font-bold text-slate-700 mb-2 leading-tight">{param.label}</span>
+                       <span className="text-blue-800 font-bold bg-blue-50 px-2 py-1.5 rounded self-start border border-blue-100" dir="ltr">{param.value}</span>
+                     </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {content.steps.map((step, index) => {
+                  const isCompleted = index < completedSteps.length;
+                  const isSkipped = isCompleted ? completedSteps[index].isSkipped : false;
+                  
+                  return (
+                    <StepBox 
+                      key={step.id}
+                      step={step}
+                      index={index}
+                      isActive={index === currentStepIndex}
+                      isCompleted={isCompleted}
+                      isSkipped={isSkipped}
+                      onComplete={handleStepComplete}
+                    />
+                  );
+                })}
+              </div>
+
+              {isFullyCompleted && content.autoCalculate && content.summaryCalc && (
+                <div className="mt-6 bg-blue-50 border-2 border-blue-200 p-6 rounded-2xl shadow-sm animate-fade-in relative z-10">
+                  <h3 className="font-bold text-blue-900 text-xl mb-3 flex items-center gap-2">
+                    <Calculator size={24} />
+                    חישוב אוטומטי מסכם
+                  </h3>
+                  <p className="text-blue-800 mb-4 font-medium">{content.summaryCalc.explanation}</p>
+                  <div className="scale-110 flex justify-center">
+                     {content.summaryCalc.formulaJSX}
+                  </div>
+                </div>
+              )}
+
+              {isFullyCompleted && content.hasExcelSim && (
+                <div className="animate-fade-in relative z-10">
+                  <ExcelSimulator defaultRate={content.steps[content.steps.length-1].correctAnswer} />
+                </div>
+              )}
+
+              {isFullyCompleted && (
+                <div className="mt-10 text-center animate-bounce-short relative z-10">
+                  <div className="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-900 px-8 py-4 rounded-full font-bold text-xl mb-8 border-2 border-emerald-300 shadow-md">
+                    <CheckCircle2 size={28} className="text-emerald-600" />
+                    מצוין! סיימת את כל השלבים לתרגיל זה בהצלחה.
+                  </div>
+                  <div>
+                    <button 
+                      onClick={onFinish}
+                      className="bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-white font-bold py-4 px-10 rounded-2xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center gap-3 mx-auto text-lg"
+                    >
+                      עבור לתרגול הבא, כל הכבוד!
+                      <ChevronLeft size={24} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        function App() {
+          const [currentIndex, setCurrentIndex] = useState(0);
+
+          useEffect(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, [currentIndex]);
+
+          const currentContent = courseContent[currentIndex];
+          const progressPercentage = ((currentIndex + 1) / courseContent.length) * 100;
+
+          const handleNext = () => {
+            if (currentIndex < courseContent.length - 1) setCurrentIndex(prev => prev + 1);
+          };
+
+          const handlePrev = () => {
+            if (currentIndex > 0) setCurrentIndex(prev => prev - 1);
+          };
+
+          return (
+            <div>
+              <header className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white py-8 px-4 shadow-lg sticky top-0 z-20">
+                <div className="max-w-4xl mx-auto flex items-center justify-between">
+                  <div className="flex items-center gap-5">
+                    <div className="bg-white/10 p-4 rounded-2xl shadow-inner border border-white/20">
+                      <Calculator size={36} className="text-blue-100" />
+                    </div>
+                    <div>
+                      <h1 className="text-3xl font-extrabold tracking-tight">המאסטר בריבית אפקטיבית</h1>
+                      <p className="text-blue-200 text-base mt-2 font-medium opacity-90">קורס אקדמי משולב: תיאוריה, תרגול וסימולטורים</p>
+                    </div>
+                  </div>
+                </div>
+              </header>
+
+              <main className="max-w-4xl mx-auto mt-8 px-4">
+                <div className="mb-10 bg-white p-5 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
+                  <div className="flex justify-between text-base text-slate-600 font-bold mb-3 px-2 relative z-10">
+                    <span>שלב {currentIndex + 1} מתוך {courseContent.length}</span>
+                    <span className="text-indigo-600">{Math.round(progressPercentage)}% הושלמו</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-4 overflow-hidden relative z-10 shadow-inner">
+                    <div 
+                      className="bg-gradient-to-l from-indigo-500 via-blue-500 to-cyan-500 h-4 rounded-full transition-all duration-700 ease-out" 
+                      style={{ width: `${progressPercentage}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl shadow-xl p-6 md:p-12 border border-slate-100 relative overflow-hidden">
+                  <div className="absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full opacity-60 pointer-events-none"></div>
+                  
+                  <div className="flex items-center gap-5 mb-10 pb-6 border-b-2 border-slate-100 relative">
+                    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 shadow-sm">
+                      {currentContent.icon || <BookOpen className="text-blue-500" size={32} />}
+                    </div>
+                    <h2 className="text-3xl font-black text-slate-800 tracking-tight leading-snug">{currentContent.title}</h2>
+                  </div>
+
+                  <div className="min-h-[400px]">
+                    {currentContent.type === 'theory' ? (
+                      <div className="animate-fade-in relative z-10">
+                        {currentContent.content}
+                        <div className="mt-14 text-left border-t border-slate-100 pt-8">
+                          <button 
+                            onClick={handleNext}
+                            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-4 px-10 rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 inline-flex items-center gap-3 text-lg"
+                          >
+                            הבנתי הכל, בואו נתקדם!
+                            <ChevronLeft size={24} />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <ExerciseScreen 
+                        key={`ex-${currentIndex}`}
+                        content={currentContent} 
+                        onFinish={handleNext} 
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center mt-10 px-4">
+                  <button 
+                    onClick={handlePrev}
+                    disabled={currentIndex === 0}
+                    className={`flex items-center gap-3 font-bold py-3 px-6 rounded-xl transition-all ${
+                      currentIndex === 0 
+                        ? 'text-slate-300 cursor-not-allowed' 
+                        : 'text-indigo-600 bg-white hover:bg-indigo-50 shadow-sm border border-slate-200'
+                    }`}
+                  >
+                    <ChevronRight size={20} />
+                    חזור לפרק הקודם
+                  </button>
+                  
+                  {currentIndex === courseContent.length - 1 && currentContent.type !== 'exercise' && (
+                     <div className="text-emerald-700 font-bold flex items-center gap-2 bg-emerald-100 px-6 py-3 rounded-xl border border-emerald-200 shadow-sm text-lg">
+                       <CheckCircle2 size={24} /> סיימת את קורס המאסטר בהצלחה!
+                     </div>
+                  )}
+                </div>
+              </main>
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
